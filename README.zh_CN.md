@@ -38,6 +38,31 @@ tools/with-env.sh idf.py size
 增量构建还会保留 `build/FoloToy-AI-Passport.elf`、`.map` 和仅含应用的 `.bin`，
 便于调试。小程序安装器应使用合并的 `-full.bin`。
 
+### 通过 USB 获取设备截图
+
+运行带截图功能的固件，关闭其他串口监视器后执行：
+
+```bash
+tools/with-env.sh python tools/capture_screen.py --output ../work/captures/passport.png
+```
+
+工具自动寻找唯一的 Espressif USB 设备；连接多台时用 `--port <实际端口>` 指定。
+截图不会重启设备，默认超时 15 秒。只有收到全部像素且每行 CRC32 校验通过后，
+才会创建或替换 PNG。PNG 编码仅使用 Python 标准库，`pyserial` 来自 IDF 环境。
+截图默认放在 Git 仓库之外。
+
+BSP 在 SPI 字节交换前监听 `LV_EVENT_FLUSH_START`，从现有 20 行绘图缓冲中导出
+RGB565 小端像素行。独立 USB 任务持有 LVGL 锁，同步触发一次整屏刷新。
+截图时界面可能短暂停顿，按键回调不负责传输数据。MCU 不分配 150 KiB 的整屏
+缓存；服务使用 9 KiB 任务栈、2 KiB TX 缓冲、256 字节 RX 缓冲及驱动开销。
+
+`FPS1` 行协议包含独立请求 ID、BEGIN/ROW/END 记录、base64 像素数据和逐行 CRC32。
+接收端忽略无关日志与旧请求，拒绝缺失、重叠、越界和设备错误。每个包最多等待
+100 ms，传输总预算为 8 秒。超时后会移除临时显示回调并释放 UI 锁。
+
+截图包含 LVGL 渲染的像素及屏幕图层，无法测量物理背光亮度、屏幕坏点，也不是
+从 LCD 读回显存。这是按需调试功能，不提供实时视频或远程按键控制。
+
 ### 当前设备部署
 
 2026-09-06 对连接的 TRAE 设备做了完整 Flash 备份。它的原始分区表没有 Recovery
@@ -49,7 +74,8 @@ BLE Recovery 流程。
 和 `0x310000..0x7fffff` 与备份一致，覆盖 NVS、设备身份及全部资源数据。
 原 bootloader 已成功启动 Embedded Swift 应用。
 
-私有备份与串口日志位于 Git 仓库外的 `../work/device-backups/`；待刷镜像位于
+私有备份与串口日志位于 Git 仓库外的 `../work/device-backups/`；当前截图固件位于
+`../work/deployment/screenshot-fd28679a/`，最初 Swift 镜像保留在
 `../work/deployment/swift-aa3fe0d3/`。本次仅应用 USB 测试不能证明这台设备支持
 小程序安装或永久 Recovery。
 
@@ -64,6 +90,7 @@ BLE Recovery 流程。
 | `Package.swift` | SwiftPM 库与主机测试，可用 Xcode 打开开发核心逻辑 |
 | `tests/swift-interop/` | 用假的 C 端点执行真实 Embedded Swift 适配层 |
 | `tools/with-env.sh` | 仅对当前命令激活 IDF/Swift |
+| `tools/capture_screen.py` | USB 屏幕采集、CRC/覆盖范围检查及 PNG 输出 |
 | [Embedded Swift skill](skills/embedded-swift-passport/SKILL.zh_CN.md) | 项目工作流，通过 `.agents/skills/` 提供发现入口 |
 
 ## 工具链

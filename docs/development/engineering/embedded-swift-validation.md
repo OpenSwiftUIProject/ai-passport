@@ -12,21 +12,61 @@ local starter implementation, not a published release.
 | Swift model host tests | PASS: 3 XCTest cases |
 | Embedded Swift C interop | PASS: real Swift adapter, fake C endpoints, 200 page lifecycles across valid/unavailable battery scenarios |
 | Existing C/Python tests | PASS: UI math and 2 firmware-verifier tests |
+| Screenshot host tests | PASS: firmware C encoder consumed by Python; 5 cases covering pixel/PNG colors, CRC, bounds, stale records, gaps and overlaps |
+| USB screenshots | PASS: 20 reconnect/capture cycles; 76,800 pixels per frame; 0.557-0.567 s including completion diagnostics |
+| Screenshot memory | PASS in the 20-capture run: free heap remained 151,736 bytes; minimum task stack margin 4,520 bytes |
+| Interrupted receiver / malformed input | PASS: close mid-frame, reconnect, reject malformed/overlong commands, then capture a complete frame without reboot |
 | Repository/workflow/static checks | PASS |
 | Skill schema | PASS |
 | ESP32-C3 firmware | PASS: RISC-V 32-bit ELF, linked Swift lifecycle functions and C BSP |
 | Complete gate | PASS: `tools/with-env.sh ./tools/validate.sh` |
 | USB deployment / boot | PASS: ESP32-C3 revision v1.1, 8 MB Flash; app-only write and digest verification; Embedded Swift startup marker observed |
 | BSP initialization | PASS: device reports Display=1, Button=1, Audio=1, Battery=1; this is not visual/audio acceptance |
-| Idle runtime observation | PASS: 240.2 seconds of serial capture, one startup, zero panic/watchdog markers; no Swift page input events observed |
+| Initial firmware idle observation | PASS: 240.2 seconds of serial capture, one startup, zero panic/watchdog markers; no Swift page input events observed |
 | Swift page entry | PASS: user confirms the test page opens normally; user report after the serial capture ended |
 | Counter / backlight / long-OK acceptance | PENDING: these specific behaviors have not yet been confirmed |
 | Permanent Recovery | UNAVAILABLE before flashing: no partition entry and the entire reserved region was erased |
 | Remote GitHub CI | NOT RUN: inherited environments still need Swift provisioning |
 
-## Swift firmware
+## Screenshot firmware
 
-The app is **1,519,392 bytes**; its verified merged file is **1,584,928 bytes**:
+The deployed screenshot app is **1,531,472 bytes**, within the **3,145,728-byte**
+factory partition; its merged artifact is **1,597,008 bytes**.
+
+```text
+build/FoloToy-AI-Passport-full.bin
+Merged SHA-256: fd28679a152c003a41acb03d94b82c8b84d6a5855b33b87ad413aeb2f77bf368
+Application SHA-256: 0e23cc1939f7daa88b97393249512b52d05dc9e7931f34091e83a40f606d04b4
+```
+
+The complete gate passed before deployment. Only the application at `0x10000`
+was updated, with device digest checks before and after confirming the original
+bootloader/table/NVS and `0x310000..0x7fffff` data remain unchanged. The final
+host receiver also passed the complete static gate.
+
+To prevent `USB_UART_CHIP_RESET` when connecting on macOS, the receiver follows
+ESP-IDF Monitor's no-reset order:
+assert both before opening, then release RTS before DTR. Three connection-only
+cycles and 20 capture/reconnect cycles produced no boot or panic markers.
+
+The mid-frame receiver-close check produced a bounded `ESP_ERR_TIMEOUT`; a
+fresh request recovered all 76,800 pixels in 0.684 seconds with unchanged heap.
+This verifies stopped-receiver recovery, not physical USB cable removal.
+No 150 KiB screenshot buffer is allocated on the MCU. The test captured the
+actual LVGL main menu and inspected the PNG's colors, orientation and layout;
+physical brightness/panel defects remain outside the screenshot's scope.
+
+Private evidence is in
+`FoloToy/work/device-backups/20260906T044501Z/screenshot-fd28679a/`, including
+`boot.log`, `stress-results.json`, `serial-open-check.json`, and
+`interruption-results.json`. Build and host logs are in
+`FoloToy/work/logs/usb-screenshot-full-validation.log` and
+`FoloToy/work/logs/usb-screenshot-static.log`.
+
+## Initial Swift firmware
+
+The initial app was **1,519,392 bytes**; its merged file was **1,584,928 bytes**.
+It is retained for rollback:
 
 ```text
 ../work/deployment/swift-aa3fe0d3/FoloToy-AI-Passport-full.bin
@@ -63,9 +103,10 @@ were extracted from the recorded merged artifact under
 `FoloToy/work/deployment/swift-aa3fe0d3/`; this avoids mixing the isolated
 validation build with later incremental build segments.
 
-The incremental `idf.py size` report shows 179,112 bytes of static DRAM usage.
+The initial incremental `idf.py size` report showed 179,112 bytes of static DRAM usage.
 Its reported 142,184-byte remainder is a link-time budget, **not measured runtime
-free heap**. Runtime fragmentation, DMA, and task allocations remain unverified.
+free heap**. Long-duration fragmentation and combined peripheral workloads
+remain unverified; the screenshot-run heap measurements are recorded above.
 
 The map contains `passport_swift_prepare`, `passport_swift_enter`,
 `passport_swift_action`, `passport_swift_exit`, `bsp_display_backlight`, and

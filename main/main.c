@@ -16,6 +16,7 @@
 #include "esp_log.h"
 #include "esp_sleep.h"
 #include "swift/PassportBridge.h"
+#include "screen_capture.h"
 
 static const char *TAG = "main";
 
@@ -150,4 +151,8 @@ void app_main(void) {
 
     ESP_LOGI(TAG, "就绪:Display=%d Button=%d Audio=%d Battery=%d",
              s_ok[0], s_ok[1], s_ok[2], s_ok[3]);
+    esp_err_t capture_result = screen_capture_start();
+    if (capture_result != ESP_OK) {
+        ESP_LOGW(TAG, "USB screenshot unavailable: %s", esp_err_to_name(capture_result));
+    }
 }

@@ -6,6 +6,10 @@
 
 ## Unreleased
 
+- Added on-demand USB screenshots using the existing LVGL partial draw buffer,
+  bounded worker-side transfers, checked pixel records, and a Mac/PC PNG capture
+  tool with cross-language protocol and corruption/incomplete-frame tests.
+
 - Added an Embedded Swift counter/backlight page, a shared SwiftPM-tested model,
   C interop lifecycle tests, a local toolchain launcher, and a bilingual starter skill/README.
 

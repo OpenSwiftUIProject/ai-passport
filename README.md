@@ -42,6 +42,37 @@ verified `build/FoloToy-AI-Passport-full.bin`. An incremental build also leaves
 `build/FoloToy-AI-Passport.elf`, `.map`, and the app-only `.bin` for debugging.
 Only the merged `-full.bin` is suitable for the mini-program installer.
 
+### Capture the device screen over USB
+
+With screenshot-enabled firmware running, close other serial monitors and run:
+
+```bash
+tools/with-env.sh python tools/capture_screen.py --output ../work/captures/passport.png
+```
+
+The tool discovers a single Espressif USB device; specify `--port <actual-port>`
+if several are connected. It does not reset the device. The default timeout is
+15 seconds. The PNG is created/replaced only after every pixel has arrived and
+all row CRC32 checks pass. Python's standard library encodes PNG; `pyserial`
+comes from the IDF environment. Keep screenshots outside Git by default.
+
+The BSP observes `LV_EVENT_FLUSH_START` before the SPI byte swap and exports
+RGB565 little-endian rows from the existing 20-line draw buffer. A dedicated
+USB task triggers one synchronous full refresh while holding the LVGL lock.
+The UI can briefly pause during capture; input callbacks do not transmit data.
+No 150 KiB full-screen buffer is allocated on the MCU. The service uses a
+9 KiB task stack, 2 KiB TX buffer and 256-byte RX buffer plus driver overhead.
+
+The `FPS1` line protocol uses a fresh request ID, BEGIN/ROW/END records,
+base64 pixel data and per-row CRC32. The receiver ignores unrelated logs/stale
+requests and rejects gaps, overlaps, bad coordinates and device errors. Writes
+wait at most 100 ms per packet; the transfer has an 8-second budget. A timeout
+removes the temporary display callback and releases the UI lock.
+
+Captures contain LVGL-rendered pixels, including screen layers. They do not
+measure physical backlight brightness, panel defects, or LCD readback. This is
+an on-demand debug facility, not a live video stream or a button-control API.
+
 ### Current device deployment
 
 The connected TRAE unit was backed up in full before flashing on 2026-09-06.
@@ -56,7 +87,8 @@ and `0x310000..0x7fffff`, covering NVS, identity, and all resource data. The
 original bootloader successfully started the Embedded Swift application.
 
 Private backups and serial logs are outside Git in `../work/device-backups/`;
-staged images are in `../work/deployment/swift-aa3fe0d3/`. This app-only USB test
+current screenshot images are in `../work/deployment/screenshot-fd28679a/`, and
+the initial Swift image remains in `../work/deployment/swift-aa3fe0d3/`. This app-only USB test
 does not establish mini-program installation or Recovery support for this unit.
 
 ## Layout
@@ -70,6 +102,7 @@ does not establish mini-program installation or Recovery support for this unit.
 | `Package.swift` | SwiftPM library and host tests; open in Xcode for core work |
 | `tests/swift-interop/` | Actual Embedded Swift adapter exercised against fake C endpoints |
 | `tools/with-env.sh` | Per-command IDF/Swift activation |
+| `tools/capture_screen.py` | USB screen capture with CRC/coverage checks and PNG output |
 | [Embedded Swift skill](skills/embedded-swift-passport/SKILL.md) | Project workflow, also discoverable through `.agents/skills/` |
 
 ## Toolchains

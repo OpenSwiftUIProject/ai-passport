@@ -6,6 +6,9 @@
 
 ## Unreleased
 
+- 新增按需 USB 截图：复用 LVGL 分块绘图缓冲，在工作任务中限时传输并校验像素记录；
+  提供 Mac/PC PNG 接收工具，以及跨语言协议、损坏数据和不完整画面的测试。
+
 - 新增 Embedded Swift 计数与背光页面、SwiftPM 测试共用模型、C 互调生命周期测试、
   本地工具链启动脚本和双语开发 skill/README。
 

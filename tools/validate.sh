@@ -29,6 +29,10 @@ run_static_checks() {
         -o "${test_dir}/test_ui_pixel_math"
     "${test_dir}/test_ui_pixel_math"
     python3 tests/test_verify_firmware.py
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
+        tests/test_screen_protocol.c main/screen_protocol.c \
+        -o "${test_dir}/test_screen_protocol"
+    python3 tests/test_capture_screen.py "${test_dir}/test_screen_protocol"
     swift test --package-path "${repo_root}"
     ./tools/test-swift-interop.sh
     rm -rf "${test_dir}"

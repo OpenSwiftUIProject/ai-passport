@@ -34,3 +34,12 @@ struct _lv_display_t *bsp_lvgl_init(void);
 // LVGL 非线程安全:在【非 LVGL 任务】里操作任何 lv_* 对象前后必须加解锁。
 bool bsp_lvgl_lock(int timeout_ms);
 void bsp_lvgl_unlock(void);
+
+// Synchronous, on-demand capture of rendered RGB565 little-endian pixel rows.
+// Call from a worker task, never an input/timer callback. This holds the LVGL
+// lock while refreshing one frame; the sink must have bounded waits. Pixel
+// storage is borrowed and valid only during the sink call. No full-frame copy
+// is allocated. Current BSP partial rendering / unrotated RGB565 only.
+typedef esp_err_t (*bsp_display_row_sink_t)(uint16_t x, uint16_t y, uint16_t width,
+                                          const uint8_t *rgb565_le, void *context);
+esp_err_t bsp_display_capture(bsp_display_row_sink_t sink, void *context);
