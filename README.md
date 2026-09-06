@@ -66,15 +66,43 @@ FoloToy/
   work/                       ignored-by-location logs, previews and staging
 ```
 
-For a fresh checkout, use repository or fork URLs that publish these branches:
+For a fresh checkout, use your firmware repository or fork URL for
+`<ai-passport-repository-url>`. OpenSwiftUI's branch is available in its upstream
+repository:
 
 ```bash
 mkdir -p FoloToy/framework
 cd FoloToy
 git clone --single-branch --branch embed/folotoy <ai-passport-repository-url> ai-passport
-git clone --single-branch --branch embed/folotoy <openswiftui-repository-url> framework/OpenSwiftUI
+git clone --single-branch --branch embed/folotoy https://github.com/OpenSwiftUIProject/OpenSwiftUI.git framework/OpenSwiftUI
 cd ai-passport
 ```
+
+### Set up OpenSwiftUI for an existing firmware checkout
+
+From the `ai-passport` repository root, clone the framework into the default
+location:
+
+```bash
+mkdir -p ../framework
+git clone --single-branch --branch embed/folotoy \
+    https://github.com/OpenSwiftUIProject/OpenSwiftUI.git ../framework/OpenSwiftUI
+```
+
+If you already have this OpenSwiftUI branch checked out, reuse it and set its
+absolute path instead of cloning again:
+
+```bash
+export OPENSWIFTUI_SOURCE_DIR=/absolute/path/to/OpenSwiftUI
+```
+
+The checkout must contain `Embedded/sources.txt` and `Embedded/idf.cmake`.
+The firmware builds and links the framework automatically; no manual archive
+copy or OAG setup is required. See the
+[OpenSwiftUI Embedded guide](https://github.com/OpenSwiftUIProject/OpenSwiftUI/blob/embed/folotoy/Embedded/README.md)
+for standalone host builds and the renderer contract.
+
+### Select the toolchain and build
 
 Install ESP-IDF 5.5.3 and its ESP32-C3 tools using the
 [environment guide](docs/development/engineering/environment-setup.md), then
@@ -91,6 +119,7 @@ Run from this firmware repository; the initial build resolves the pinned
 Managed Components, including LVGL and `espressif/idf_swift`:
 
 ```bash
+tools/with-env.sh ./tools/test-openswiftui.sh     # verify framework + ContentView integration
 tools/with-env.sh ./tools/validate.sh             # host tests + isolated C3 gate
 tools/with-env.sh idf.py build                    # incremental development
 tools/with-env.sh idf.py size

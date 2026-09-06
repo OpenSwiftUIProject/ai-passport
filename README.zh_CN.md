@@ -62,15 +62,39 @@ FoloToy/
   work/                       日志、预览与部署暂存，不在源码仓库中
 ```
 
-首次克隆时，使用已发布这些分支的仓库或 fork 地址：
+首次克隆时，将 `<ai-passport-repository-url>` 替换为你的固件仓库或 fork 地址。
+OpenSwiftUI 分支已发布在其上游仓库中：
 
 ```bash
 mkdir -p FoloToy/framework
 cd FoloToy
 git clone --single-branch --branch embed/folotoy <ai-passport-repository-url> ai-passport
-git clone --single-branch --branch embed/folotoy <openswiftui-repository-url> framework/OpenSwiftUI
+git clone --single-branch --branch embed/folotoy https://github.com/OpenSwiftUIProject/OpenSwiftUI.git framework/OpenSwiftUI
 cd ai-passport
 ```
+
+### 为已有固件 checkout 配置 OpenSwiftUI
+
+在 `ai-passport` 仓库根目录运行，将框架克隆到默认位置：
+
+```bash
+mkdir -p ../framework
+git clone --single-branch --branch embed/folotoy \
+    https://github.com/OpenSwiftUIProject/OpenSwiftUI.git ../framework/OpenSwiftUI
+```
+
+如果已经有该 OpenSwiftUI 分支的 checkout，可直接复用，指定其绝对路径，无需再次克隆：
+
+```bash
+export OPENSWIFTUI_SOURCE_DIR=/absolute/path/to/OpenSwiftUI
+```
+
+该 checkout 需要包含 `Embedded/sources.txt` 和 `Embedded/idf.cmake`。
+固件会自动构建并链接框架，无需手动复制静态库或配置 OAG。
+独立主机构建与渲染接收器的接口要求见
+[OpenSwiftUI Embedded 指南](https://github.com/OpenSwiftUIProject/OpenSwiftUI/blob/embed/folotoy/Embedded/README.md)。
+
+### 选择工具链并构建
 
 按[环境指南](docs/development/engineering/environment-setup.zh_CN.md)安装
 ESP-IDF 5.5.3 及 ESP32-C3 工具，再安装带 Embedded RISC-V 库的 Swift 6.3.1 RELEASE。
@@ -86,6 +110,7 @@ export SWIFT_TOOLCHAIN=/absolute/path/to/swift-6.3.1-RELEASE.xctoolchain
 `espressif/idf_swift`：
 
 ```bash
+tools/with-env.sh ./tools/test-openswiftui.sh     # 验证框架与 ContentView 接入
 tools/with-env.sh ./tools/validate.sh             # 主机测试 + 隔离 C3 门禁
 tools/with-env.sh idf.py build                    # 增量开发
 tools/with-env.sh idf.py size
