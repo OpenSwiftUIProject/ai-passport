@@ -155,11 +155,12 @@ RGB 色条、方向及布局。100% 启动电量标签来自设备快照，不�
 
 ## 裁剪边界
 
-框架选源清单在 `OPENSWIFTUI_EMBEDDED` 配置下编译现有 View/PrimitiveView、
+框架选源清单在 `OPENSWIFTUI_LVGL && hasFeature(Embedded)` 条件下编译现有 View/PrimitiveView、
 ViewBuilder、EmptyView、Never 与条件内容声明；排除图依赖、MainActor 和运行时
 元组元数据，用有序泛型 pair 表示 builder 子节点。Color、Image、Text、ZStack、
 固定像素 frame 与 offset 使用小型 Embedded 实现。通过泛型平台接收器同步渲染，
-不创建 existential View 树或动态图。
+不创建 existential View 树或动态图。框架构建在主机和 ESP32-C3 上均同时启用
+LVGL 标志与 Embedded Swift 模式。
 
 这是 OpenSwiftUI worktree 中新增的实验性 Embedded 配置，没有把正常框架依赖图
 移植到 MCU。当前不包含 Foundation、OpenAttributeGraph、OpenRenderBox、

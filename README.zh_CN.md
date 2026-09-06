@@ -44,28 +44,46 @@ AttributeGraph/RenderBox 渲染器，也不是完整兼容 SwiftUI 的运行时�
 
 ## Workspace 与构建
 
-默认使用同级目录结构：
+只需要两个源码仓库：本固件分支和 OpenSwiftUI 的 `embed/folotoy` 分支。
+此 Embedded 配置不编译或链接 OpenAttributeGraph（OAG）、OpenRenderBox、
+OpenCoreGraphics、OpenObservation、Compute 或 DarwinPrivateFrameworks。
+OpenSwiftUI-Mono 可选，无需额外克隆框架依赖的脚本。
+
+最小同级目录结构：
 
 ```text
 FoloToy/
   ai-passport/                 固件，embed/folotoy 分支
-  framework/                   分支 workspace 容器
-    OpenSwiftUI/               框架，embed/folotoy 分支
-    OpenAttributeGraph/        同级源码 worktree，当前不链接
-    ...
+  framework/
+    OpenSwiftUI/               独立克隆，embed/folotoy 分支
     build/riscv32/             独立框架编译产物
   toolchains/esp-idf-v5.5.3/
   toolchains/espressif/
   work/                       日志、预览与部署暂存，不在源码仓库中
 ```
 
-workspace 使用 OpenSwiftUI-Mono 的脚本创建：
+首次克隆时，使用已发布这些分支的仓库或 fork 地址：
 
 ```bash
-Scripts/setup.sh --worktree Repos embed/folotoy /absolute/path/FoloToy/framework
+mkdir -p FoloToy/framework
+cd FoloToy
+git clone --single-branch --branch embed/folotoy <ai-passport-repository-url> ai-passport
+git clone --single-branch --branch embed/folotoy <openswiftui-repository-url> framework/OpenSwiftUI
+cd ai-passport
 ```
 
-从固件仓库运行：
+按[环境指南](docs/development/engineering/environment-setup.zh_CN.md)安装
+ESP-IDF 5.5.3 及 ESP32-C3 工具，再安装带 Embedded RISC-V 库的 Swift 6.3.1 RELEASE。
+复用默认同级目录之外的已有安装时，显式指定路径：
+
+```bash
+export IDF_PATH=/absolute/path/to/esp-idf-v5.5.3
+export IDF_TOOLS_PATH=/absolute/path/to/espressif-tools
+export SWIFT_TOOLCHAIN=/absolute/path/to/swift-6.3.1-RELEASE.xctoolchain
+```
+
+从固件仓库运行；首次构建会解析锁定版本的 Managed Components，包含 LVGL 与
+`espressif/idf_swift`：
 
 ```bash
 tools/with-env.sh ./tools/validate.sh             # 主机测试 + 隔离 C3 门禁
@@ -77,6 +95,9 @@ tools/with-env.sh idf.py size
 框架中的 `Embedded/sources.txt` 定义裁剪清单，`Embedded/idf.cmake` 接入 IDF。
 首次构建前可设置 `OPENSWIFTUI_SOURCE_DIR` 指向另一份 worktree；已有 CMake 缓存
 使用 `idf.py -DOPENSWIFTUI_SOURCE_DIR=... build` 修改。
+框架的 `Embedded/README.md` 还说明了独立主机构建与测试，不需要 ESP-IDF 或 LVGL。
+框架构建脚本同时启用 LVGL 标志和编译器的 Embedded Swift 模式，对应
+`OPENSWIFTUI_LVGL && hasFeature(Embedded)` 条件。
 
 工具链：**ESP-IDF 5.5.3**、带 RISC-V Embedded 库的 **Swift 6.3.1 RELEASE**、
 CMake 3.29+、Ninja 和 Python 3.12。`tools/with-env.sh` 只激活当前命令，默认选择

@@ -47,28 +47,48 @@ tests. The FoloToy sky/grass/header and boot battery snapshot surround the scene
 
 ## Workspace and build
 
-The expected sibling layout is:
+Only two source repositories are required: this firmware branch and the
+OpenSwiftUI `embed/folotoy` branch. OpenAttributeGraph (OAG), OpenRenderBox,
+OpenCoreGraphics, OpenObservation, Compute, and DarwinPrivateFrameworks are not
+compiled or linked by this Embedded profile. OpenSwiftUI-Mono is optional;
+no framework dependency-cloning script is needed.
+
+The minimal sibling layout is:
 
 ```text
 FoloToy/
   ai-passport/                 firmware, branch embed/folotoy
-  framework/                   branch workspace container
-    OpenSwiftUI/               framework, branch embed/folotoy
-    OpenAttributeGraph/        sibling source worktrees, currently not linked
-    ...
+  framework/
+    OpenSwiftUI/               standalone clone, branch embed/folotoy
     build/riscv32/             standalone framework output
   toolchains/esp-idf-v5.5.3/
   toolchains/espressif/
   work/                       ignored-by-location logs, previews and staging
 ```
 
-The workspace was created with OpenSwiftUI-Mono's helper:
+For a fresh checkout, use repository or fork URLs that publish these branches:
 
 ```bash
-Scripts/setup.sh --worktree Repos embed/folotoy /absolute/path/FoloToy/framework
+mkdir -p FoloToy/framework
+cd FoloToy
+git clone --single-branch --branch embed/folotoy <ai-passport-repository-url> ai-passport
+git clone --single-branch --branch embed/folotoy <openswiftui-repository-url> framework/OpenSwiftUI
+cd ai-passport
 ```
 
-Run from this firmware repository:
+Install ESP-IDF 5.5.3 and its ESP32-C3 tools using the
+[environment guide](docs/development/engineering/environment-setup.md), then
+install Swift 6.3.1 RELEASE with Embedded RISC-V libraries. When using existing
+installations outside the default sibling paths, select them explicitly:
+
+```bash
+export IDF_PATH=/absolute/path/to/esp-idf-v5.5.3
+export IDF_TOOLS_PATH=/absolute/path/to/espressif-tools
+export SWIFT_TOOLCHAIN=/absolute/path/to/swift-6.3.1-RELEASE.xctoolchain
+```
+
+Run from this firmware repository; the initial build resolves the pinned
+Managed Components, including LVGL and `espressif/idf_swift`:
 
 ```bash
 tools/with-env.sh ./tools/validate.sh             # host tests + isolated C3 gate
@@ -81,6 +101,10 @@ when any selected source changes. `Embedded/sources.txt` in the framework
 worktree is the source selection, and `Embedded/idf.cmake` connects it to IDF.
 Set `OPENSWIFTUI_SOURCE_DIR` before a fresh build to use another worktree; an
 existing CMake cache can be changed with `idf.py -DOPENSWIFTUI_SOURCE_DIR=... build`.
+The framework's `Embedded/README.md` also documents standalone host builds and
+tests that require neither ESP-IDF nor LVGL. Its build script enables
+`OPENSWIFTUI_LVGL && hasFeature(Embedded)` through the LVGL flag and the
+compiler's Embedded Swift mode.
 
 Toolchain: **ESP-IDF 5.5.3**, **Swift 6.3.1 RELEASE** with RISC-V Embedded
 libraries, CMake 3.29+, Ninja and Python 3.12. `tools/with-env.sh` activates only

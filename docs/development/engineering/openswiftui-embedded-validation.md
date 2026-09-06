@@ -180,7 +180,9 @@ the full desktop framework build were not checked in this deployment.
 
 The framework source selection compiles the existing View/PrimitiveView,
 ViewBuilder, EmptyView, Never and conditional-content declarations with the
-`OPENSWIFTUI_EMBEDDED` configuration. The graph requirements, MainActor and
+`OPENSWIFTUI_LVGL && hasFeature(Embedded)` condition. The framework build enables
+both the LVGL flag and Embedded Swift mode on the host and ESP32-C3.
+The graph requirements, MainActor and
 runtime tuple metadata are excluded. Ordered generic pairs carry builder
 children. Small Embedded implementations provide Color, Image, Text, ZStack,
 fixed pixel frames and offsets. Rendering is synchronous through a generic
