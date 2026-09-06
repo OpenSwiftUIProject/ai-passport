@@ -6,6 +6,11 @@
 
 ## Unreleased
 
+- 新增 VStack/HStack 测量布局与可配置 RootGeometry，接入真实字体／图片尺寸，支持 padding/background 和固有／可缩放图片；示例不再使用 offset。
+
+- 接入 OpenSwiftUI Embedded 展示配置，开机展示由颜色、图片及文字组成的
+  ContentView，提供有节点上限的 LVGL 接收器、跨模块失败测试与主机 LVGL 预览。
+
 - 新增按需 USB 截图：复用 LVGL 分块绘图缓冲，在工作任务中限时传输并校验像素记录；
   提供 Mac/PC PNG 接收工具，以及跨语言协议、损坏数据和不完整画面的测试。
 

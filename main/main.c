@@ -28,7 +28,7 @@ static const demo_entry_t DEMOS[] = {
     { "Wi-Fi",   demo_wifi_enter,    demo_wifi_exit,    demo_wifi_key    },
     { "BLE",     demo_ble_enter,     demo_ble_exit,     demo_ble_key     },
     { "Low Power", demo_low_power_enter, demo_low_power_exit, demo_low_power_key },
-    { "Swift", demo_swift_enter, demo_swift_exit, demo_swift_key },
+    { "OpenSwiftUI", demo_openswiftui_enter, demo_openswiftui_exit, demo_openswiftui_key },
 };
 #define DEMO_COUNT (sizeof(DEMOS) / sizeof(DEMOS[0]))
 
@@ -144,7 +144,10 @@ void app_main(void) {
     passport_swift_prepare();
 
     if (bsp_lvgl_lock(1000)) {
-        enter_menu();
+        // This display-only experiment starts directly in ContentView.
+        // The existing long-OK route can still return to the hardware menu.
+        s_active = 7;
+        DEMOS[s_active].enter();
         s_ready = true;
         bsp_lvgl_unlock();
     }

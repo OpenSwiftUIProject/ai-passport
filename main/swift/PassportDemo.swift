@@ -36,6 +36,8 @@ func handlePassportAction(_ action: Int32) {
     renderPassport()
 }
 
+func passportBatterySnapshot() -> Int32 { bootBatteryPercent }
+
 private func renderPassport() {
     // Direct Swift -> FoloToy C BSP call, compiled for the real ESP32-C3 target.
     bsp_display_backlight(state.backlight)

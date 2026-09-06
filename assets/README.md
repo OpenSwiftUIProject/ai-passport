@@ -26,6 +26,12 @@ Store reusable source images and generated display assets in `images/`.
 - Preserve editable sources where licensing permits, and record the source and license.
 - Never commit device QR secrets, credentials, or personal data in images.
 
+`images/spark_rgb565.h` is the original 16x16 pixel-art spark for the
+OpenSwiftUI demo (`Image("spark")`). It contains 512 bytes of RGB565 const data
+in Flash, read directly by an LVGL image descriptor and scaled with nearest
+neighbor filtering. Created for this project under its MIT license; no external
+artwork or runtime decoder is used. Its palette is recorded in the header.
+
 ## Music and sound effects
 
 Store reusable music and sound-effect sources in `music/`.

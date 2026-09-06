@@ -6,6 +6,12 @@
 
 ## Unreleased
 
+- Added measured VStack/HStack layout and configurable RootGeometry, real font/image sizing, padding/background and intrinsic/resizable images; the sample no longer uses offsets.
+
+- Added an OpenSwiftUI Embedded display profile integration, a boot-visible
+  ContentView with color/image/text composition, a bounded LVGL scene sink,
+  cross-module failure tests, and a host LVGL preview tool.
+
 - Added on-demand USB screenshots using the existing LVGL partial draw buffer,
   bounded worker-side transfers, checked pixel records, and a Mac/PC PNG capture
   tool with cross-language protocol and corruption/incomplete-frame tests.

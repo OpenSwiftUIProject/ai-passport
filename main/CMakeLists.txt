@@ -11,6 +11,7 @@ idf_component_register(
          "demo_ble.c"
          "demo_low_power.c"
          "demo_swift.c"
+         "demo_openswiftui.c"
          "screen_capture.c"
          "screen_protocol.c"
     INCLUDE_DIRS "."
@@ -20,4 +21,17 @@ idf_component_register(
 idf_component_register_swift(${COMPONENT_LIB}
     BRIDGING_HEADER "${CMAKE_CURRENT_LIST_DIR}/swift/PassportBridge.h"
     SRCS "swift/PassportCore/PassportState.swift" "swift/PassportDemo.swift"
+         "swift/ContentView.swift" "swift/PassportSceneSink.swift" "swift/PassportContent.swift"
 )
+
+if(DEFINED ENV{OPENSWIFTUI_SOURCE_DIR})
+    set(osui_default "$ENV{OPENSWIFTUI_SOURCE_DIR}")
+else()
+    set(osui_default "${PROJECT_DIR}/../framework/OpenSwiftUI")
+endif()
+set(OPENSWIFTUI_SOURCE_DIR "${osui_default}" CACHE PATH "OpenSwiftUI Embedded worktree")
+if(NOT EXISTS "${OPENSWIFTUI_SOURCE_DIR}/Embedded/idf.cmake")
+    message(FATAL_ERROR "OpenSwiftUI Embedded profile missing: set OPENSWIFTUI_SOURCE_DIR; see README.md")
+endif()
+include("${OPENSWIFTUI_SOURCE_DIR}/Embedded/idf.cmake")
+openswiftui_link_embedded(${COMPONENT_LIB})

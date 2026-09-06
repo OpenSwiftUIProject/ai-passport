@@ -35,6 +35,7 @@ run_static_checks() {
     python3 tests/test_capture_screen.py "${test_dir}/test_screen_protocol"
     swift test --package-path "${repo_root}"
     ./tools/test-swift-interop.sh
+    ./tools/test-openswiftui.sh
     rm -rf "${test_dir}"
     echo "Host tests: PASS"
 }

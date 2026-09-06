@@ -2,10 +2,11 @@
 
 English | [简体中文](README.zh_CN.md)
 
-This branch includes an [Embedded Swift starter](../README.md) with host tests,
-a C BSP bridge, and a Swift hardware-demo page.
-See the [local validation record](development/engineering/embedded-swift-validation.md)
-for the tested toolchain, firmware hash, and unverified device checks.
+This branch includes an [OpenSwiftUI Embedded display](../README.md).
+Its [validation record](development/engineering/openswiftui-embedded-validation.md)
+separates framework compilation, host LVGL rendering and physical-device checks.
+The [initial Swift record](development/engineering/embedded-swift-validation.md)
+retains the earlier toolchain and device-backup results.
 
 FoloToy AI Passport is open wearable AI hardware. This repository is the development baseline for the device. It keeps the **hardware facts, stable interfaces, resource boundaries, reference implementations, and validation methods** needed to build applications in one place.
 

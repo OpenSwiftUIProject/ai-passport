@@ -1,191 +1,174 @@
 [简体中文](README.zh_CN.md) · English
 
-# AI Passport Embedded Swift Starter
+# AI Passport — OpenSwiftUI Embedded display
 
-An ESP32-C3 firmware experiment based on [FoloToy/ai-passport](https://github.com/FoloToy/ai-passport).
-The existing hardware menu gains a **Swift** page. UP/DOWN change a counter
-between 0 and 999; OK toggles the backlight between 100% and 25%; holding OK
-returns to the menu and restores 100% backlight. Reopening the page resets it.
-The battery percentage is explicitly a **boot snapshot**, not a live reading.
+The `embed/folotoy` branch builds a static-display profile of OpenSwiftUI for
+FoloToy's ESP32-C3. Edit `main/swift/ContentView.swift` to describe the screen:
 
-[Validation record](docs/development/engineering/embedded-swift-validation.md):
-host tests, the ESP32-C3 merged-image gate, and USB deployment/boot passed.
-The user confirms Swift page entry works. Counter, backlight and long-OK
-acceptance is still pending.
+```swift
+import OpenSwiftUI
 
-Application state and behavior are written in Embedded Swift. Swift directly
-calls `bsp_display_backlight()` and `bsp_battery_soc()`; a small C adapter builds
-the LVGL page. Existing display, input, audio, and radio demos remain available.
-Permanent Recovery requires prior factory provisioning; this image does not
-install it. Installing this firmware replaces the TRAE factory application;
-factory profile/Token synchronization is not implemented here.
-
-## Quick start on this workspace
-
-Run these commands from the repository:
-
-```bash
-swift test                                      # native Swift logic tests
-tools/with-env.sh tools/test-swift-interop.sh     # Embedded Swift + fake C BSP
-tools/with-env.sh ./tools/validate.sh             # full gate + real C3 firmware
+struct ContentView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image("spark")
+                .resizable()
+                .frame(width: 80, height: 80)
+            Text("Hello, OpenSwiftUI!")
+            HStack(spacing: 8) {
+                Color.red.frame(width: 32, height: 8)
+                Color.blue.frame(width: 32, height: 8)
+            }
+        }
+        .padding(12)
+        .background(Color(white: 0.1))
+    }
+}
 ```
 
-For iterative firmware builds and inspecting the ELF/map:
+The framework is compiled separately into `OpenSwiftUI.swiftmodule` and
+`libOpenSwiftUI.a`, then imported and linked by the firmware. The shared View
+protocol, builder, empty and conditional views are compiled with an explicit
+Embedded configuration; platform-dependent primitives have small Embedded
+implementations. This is a **static display subset**, not the desktop
+AttributeGraph/RenderBox renderer or a full SwiftUI-compatible runtime.
+
+The board starts directly in the View display. This page adds no input behavior.
+The inherited long-OK action returns to the hardware menu, whose `OpenSwiftUI`
+entry opens it again. The original counter model/adapter remain as regression
+tests. The FoloToy sky/grass/header and boot battery snapshot surround the scene.
+
+## Workspace and build
+
+The expected sibling layout is:
+
+```text
+FoloToy/
+  ai-passport/                 firmware, branch embed/folotoy
+  framework/                   branch workspace container
+    OpenSwiftUI/               framework, branch embed/folotoy
+    OpenAttributeGraph/        sibling source worktrees, currently not linked
+    ...
+    build/riscv32/             standalone framework output
+  toolchains/esp-idf-v5.5.3/
+  toolchains/espressif/
+  work/                       ignored-by-location logs, previews and staging
+```
+
+The workspace was created with OpenSwiftUI-Mono's helper:
 
 ```bash
-tools/with-env.sh idf.py build
+Scripts/setup.sh --worktree Repos embed/folotoy /absolute/path/FoloToy/framework
+```
+
+Run from this firmware repository:
+
+```bash
+tools/with-env.sh ./tools/validate.sh             # host tests + isolated C3 gate
+tools/with-env.sh idf.py build                    # incremental development
 tools/with-env.sh idf.py size
 ```
 
-The full gate builds with an isolated configuration and publishes only the
-verified `build/FoloToy-AI-Passport-full.bin`. An incremental build also leaves
-`build/FoloToy-AI-Passport.elf`, `.map`, and the app-only `.bin` for debugging.
-Only the merged `-full.bin` is suitable for the mini-program installer.
+The build automatically rebuilds the separately compiled OpenSwiftUI module
+when any selected source changes. `Embedded/sources.txt` in the framework
+worktree is the source selection, and `Embedded/idf.cmake` connects it to IDF.
+Set `OPENSWIFTUI_SOURCE_DIR` before a fresh build to use another worktree; an
+existing CMake cache can be changed with `idf.py -DOPENSWIFTUI_SOURCE_DIR=... build`.
 
-### Capture the device screen over USB
+Toolchain: **ESP-IDF 5.5.3**, **Swift 6.3.1 RELEASE** with RISC-V Embedded
+libraries, CMake 3.29+, Ninja and Python 3.12. `tools/with-env.sh` activates only
+the current command. It defaults to sibling toolchains and the installed Swift
+6.3.1 toolchain; `IDF_PATH`, `IDF_TOOLS_PATH`, and `SWIFT_TOOLCHAIN` override them.
+Xcode's native Swift alone does not include this Mac's required RISC-V libraries.
+See the [initial toolchain/deployment record](docs/development/engineering/embedded-swift-validation.md).
 
-With screenshot-enabled firmware running, close other serial monitors and run:
+## Supported display subset
+
+| API | Current behavior |
+| --- | --- |
+| `struct ContentView: View`, `some View` | Statically specialized body traversal |
+| `@ViewBuilder`, nested custom views | Ordered composition, empty blocks, `if`, `if/else` |
+| `Color(red:green:blue:opacity:)`, constant colors | Constant sRGB fills; alpha supported |
+| `Image("spark")`, `.resizable()` | Intrinsic asset size by default; resizable images accept size proposals with nearest-neighbor scaling |
+| `Text("literal")`, `.foregroundStyle(Color)` | Actual Montserrat 14 measurement and width-dependent wrapping; no dynamic localization or CJK font |
+| `VStack`, `HStack`, `VStackLayout`, `HStackLayout` | Measure/place layout, explicit spacing, edge/center alignment, and flexible-space distribution |
+| `RootGeometry` | Physical screen size and content insets, root size proposal and centering |
+| `Layout` | Custom generic layouts with a typed cache and separate size/placement phases |
+| `ZStack`, `.frame`, `.padding`, `.background`, `.offset` | Measured overlays and modifiers; offset changes drawing, not the space reported to a parent |
+
+`PassportContent` obtains the LVGL display size and theme insets from C and
+configures `RootGeometry` before layout: the 240x320 panel currently offers
+216x224 pixels after top 66, bottom 30 and side 12 insets. Swift does not hardcode
+the content size. The renderer proposes that space, measures children, then
+places them. Text dimensions come from the same font/wrapping code as the label.
+The sample ContentView uses stacks and no offsets.
+
+The Embedded `Layout` contract uses integer pixel geometry and generic,
+index-based child access. Its measure/place flow and flexibility probes follow
+the framework's layout model; the desktop AttributeGraph `RootGeometry` rule
+and full `StackLayout` engine are not linked. Default spacing is a constant
+8 pixels. Baseline/RTL alignment, layout priorities, Spacer, dynamic layout,
+state/observation, animation, SF Symbols and runtime image decoding remain
+outside this profile. Unimplemented APIs are unavailable at compile time.
+
+The C scene sink owns LVGL objects under the existing LVGL lock. It permits at
+most 32 drawing nodes, rejects invalid coordinates and unknown assets, copies
+bounded text, and deletes all scene objects on exit. The sample uses 8 nodes.
+No full-screen framebuffer is added to the MCU. The sample image is 512 bytes
+of constant RGB565 Flash data; see [assets](assets/README.md).
+
+## Preview and tests
+
+```bash
+tools/with-env.sh ./tools/test-openswiftui.sh
+tools/with-env.sh ./tools/preview-openswiftui.sh ../work/captures/openswiftui-preview.png
+```
+
+The preview builds the same pinned LVGL sources on the host and uses the real
+C scene sink, actual `ContentView`, framework module and pixel asset. It renders
+240x320 RGB565 pixels and saves PNG through the checked screenshot protocol.
+Its battery is an explicit **73% host fixture**; it is not a device screenshot.
+The preview additionally checks unknown assets, node limits and 20 page lifecycles.
+It requires `managed_components/lvgl__lvgl` to have been resolved by an IDF build.
+
+Host tests also exercise the actual framework/client module boundary, nested
+builders, conditional branches, geometry and colors, plus all eight sink failure
+positions in the firmware's real ContentView. These are separate from device
+boot, panel output, heap and USB capture checks. Current results are in the
+[OpenSwiftUI validation record](docs/development/engineering/openswiftui-embedded-validation.md).
+
+## Device deployment and USB capture
+
+The connected gift previously received app-only test firmware. Its original
+partition table has **no Recovery entry**, and the reserved Recovery region was
+empty before flashing. The original full Flash backup is retained privately in
+`../work/device-backups/`; the last known working screenshot app is staged under
+`../work/deployment/screenshot-fd28679a/`.
+
+For this specific unit, extract the application from the verified merged image
+and write **only the application at `0x10000`**. Preserve the original bootloader,
+partition table, NVS, identity, resources and Recovery region. Recheck the device
+and preserved-region digests before and after writing. Never erase the device or
+use the merged image as a raw whole-device write for this legacy unit.
+
+The full gate publishes only `build/FoloToy-AI-Passport-full.bin`; incremental
+build segments may have different timestamps, so extract app-only deployment
+bytes from that verified artifact. Keep the 3 MB application limit and protected
+ranges in the [BLE/Recovery contract](docs/development/engineering/ble-recovery-compatibility.md).
+No device credentials or private recovery URLs belong in Git.
+
+After a successful deployment, close other serial monitors and capture:
 
 ```bash
 tools/with-env.sh python tools/capture_screen.py --output ../work/captures/passport.png
 ```
 
-The tool discovers a single Espressif USB device; specify `--port <actual-port>`
-if several are connected. It does not reset the device. The default timeout is
-15 seconds. The PNG is created/replaced only after every pixel has arrived and
-all row CRC32 checks pass. Python's standard library encodes PNG; `pyserial`
-comes from the IDF environment. Keep screenshots outside Git by default.
+The tool autodetects a single Espressif USB device, or accepts `--port`.
+It follows the no-reset RTS/DTR sequence, checks per-row CRC32 and complete pixel
+coverage, and saves only a complete frame. Capture temporarily holds the UI lock
+and uses the existing 20-line LVGL buffer. It cannot measure physical brightness
+or panel defects. This is an on-demand screenshot facility, not video streaming.
 
-The BSP observes `LV_EVENT_FLUSH_START` before the SPI byte swap and exports
-RGB565 little-endian rows from the existing 20-line draw buffer. A dedicated
-USB task triggers one synchronous full refresh while holding the LVGL lock.
-The UI can briefly pause during capture; input callbacks do not transmit data.
-No 150 KiB full-screen buffer is allocated on the MCU. The service uses a
-9 KiB task stack, 2 KiB TX buffer and 256-byte RX buffer plus driver overhead.
-
-The `FPS1` line protocol uses a fresh request ID, BEGIN/ROW/END records,
-base64 pixel data and per-row CRC32. The receiver ignores unrelated logs/stale
-requests and rejects gaps, overlaps, bad coordinates and device errors. Writes
-wait at most 100 ms per packet; the transfer has an 8-second budget. A timeout
-removes the temporary display callback and releases the UI lock.
-
-Captures contain LVGL-rendered pixels, including screen layers. They do not
-measure physical backlight brightness, panel defects, or LCD readback. This is
-an on-demand debug facility, not a live video stream or a button-control API.
-
-### Current device deployment
-
-The connected TRAE unit was backed up in full before flashing on 2026-09-06.
-Its original partition table has no Recovery entry, and `0x700000..0x7fffff`
-was entirely erased. This unit therefore cannot use the documented permanent
-BLE Recovery flow in its current state.
-
-The USB test writes **only the application at `0x10000`**, extracted from the
-verified merged artifact. The original bootloader and partition table remain
-in use. Post-write device digest checks matched the backup for `0x0..0xffff`
-and `0x310000..0x7fffff`, covering NVS, identity, and all resource data. The
-original bootloader successfully started the Embedded Swift application.
-
-Private backups and serial logs are outside Git in `../work/device-backups/`;
-current screenshot images are in `../work/deployment/screenshot-fd28679a/`, and
-the initial Swift image remains in `../work/deployment/swift-aa3fe0d3/`. This app-only USB test
-does not establish mini-program installation or Recovery support for this unit.
-
-## Layout
-
-| Path | Purpose |
-| --- | --- |
-| `main/swift/PassportCore/PassportState.swift` | Same pure Swift model for host and firmware |
-| `main/swift/PassportDemo.swift` | C-callable Swift lifecycle and direct BSP calls |
-| `main/swift/PassportBridge.h` | Fixed-width C/Swift API contract |
-| `main/demo_swift.c` | LVGL objects and physical button translation |
-| `Package.swift` | SwiftPM library and host tests; open in Xcode for core work |
-| `tests/swift-interop/` | Actual Embedded Swift adapter exercised against fake C endpoints |
-| `tools/with-env.sh` | Per-command IDF/Swift activation |
-| `tools/capture_screen.py` | USB screen capture with CRC/coverage checks and PNG output |
-| [Embedded Swift skill](skills/embedded-swift-passport/SKILL.md) | Project workflow, also discoverable through `.agents/skills/` |
-
-## Toolchains
-
-- ESP-IDF **5.5.3**, ESP32-C3, 8 MB Flash, no PSRAM.
-- Managed component `espressif/idf_swift` **1.0.1**; resolved versions are in `dependencies.lock`.
-- Embedded Swift **6.3.1 RELEASE** is selected from the existing macOS toolchain
-  installation. The Xcode-provided Swift can run native tests, but its installation
-  on this Mac does not contain the required RISC-V Embedded libraries.
-- CMake **3.29+**, Ninja, and Python **3.12**.
-
-Workspace-local downloads live outside the Git repository:
-
-```text
-FoloToy/
-  ai-passport/                 this checkout
-  toolchains/esp-idf-v5.5.3/    ESP-IDF source
-  toolchains/espressif/        compiler, Python environment and tools
-  work/logs/                  setup and validation logs
-```
-
-On a fresh machine, install an Embedded-capable toolchain from
-[Swift.org](https://www.swift.org/install/), CMake, Ninja, and Python first. Then:
-
-```bash
-mkdir -p ../toolchains
-git clone --branch v5.5.3 --depth 1 --recurse-submodules --shallow-submodules \
-  https://github.com/espressif/esp-idf.git ../toolchains/esp-idf-v5.5.3
-export IDF_TOOLS_PATH="$(cd .. && pwd)/toolchains/espressif"
-../toolchains/esp-idf-v5.5.3/install.sh esp32c3
-```
-
-`tools/with-env.sh` defaults to the sibling `toolchains/` directory. Override
-`IDF_PATH`, `IDF_TOOLS_PATH`, or `SWIFT_TOOLCHAIN` to reuse another installation.
-`SWIFT_TOOLCHAIN` is the toolchain root containing `usr/bin/swiftc`. The script
-does not edit shell profiles, change Xcode selection, or install global skills.
-
-## Test coverage and physical acceptance
-
-Native tests cover mixed input, brightness state, and saturating counter bounds.
-The interop harness executes the **real** Swift adapter in Embedded mode on the
-host: 200 enter/action/exit cycles, unknown action rejection, optional battery
-data, and backlight restoration. Its C endpoints are fakes. Cross-compilation
-and merged-image verification exercise the actual ESP-IDF/BSP integration.
-Neither of those checks proves the board boots or its peripherals work.
-
-Once a device is connected with a data-capable USB cable:
-
-1. Identify its actual `/dev/cu.usbmodem*` port; close other serial clients.
-2. Preserve the official recovery link privately. Confirm the replacement
-   firmware is intended before installing it through the official mini-program
-   or [web tool](https://ai-passport.folotoy.cn/tools/web-flasher/).
-3. Check for `Embedded Swift ready on FoloToy ESP32-C3` in USB serial logs.
-4. From the initial Display menu selection, click UP once to select Swift, then
-   OK. Confirm the counter starts at 0 and the battery shows a plausible boot
-   reading or `--%`.
-5. UP, UP, DOWN must show 1. OK must alternate 25%/100% backlight. Long OK must
-   restore full brightness and return to the menu. Reenter and repeat 20 times.
-6. Confirm no reboot loop, assertion, watchdog, growing heap loss, or damaged
-   baseline demos. On units with a provisioned permanent Recovery and its boot
-   hook, power off and hold UP while powering on for five seconds to verify
-   Recovery entry. The current legacy unit does not meet that prerequisite.
-
-Keep `cardid` at `0x356000`, Recovery at `0x700000`, and the 3 MB app limit.
-Never use full-chip erase on the provisioned gift. See the authoritative
-[BLE/recovery contract](docs/development/engineering/ble-recovery-compatibility.md).
-No device SN, KEY, or personal recovery URL belongs in this repository.
-
-## Scope
-
-This is a local firmware starter, not a SwiftUI app or an implementation of the
-factory cloud protocol. No radio/audio behavior was added to the Swift page.
-The inherited GitHub workflows need Embedded Swift provisioned in their build
-environment before they can build this branch; local validation is the current
-supported path. Remote CI is untested; physical results are limited to the
-checks explicitly recorded above.
-
-Known build diagnostics: the pinned Swift component forwards three unused
-`BUTTON_VER_*` C definitions that produce Swift warnings. No Swift logic reads
-them. ESP-IDF also compares the application against the smaller protected
-Recovery partition and prints a size warning. This application is placed in the
-3 MB factory partition, not Recovery; the merged-image gate verifies that layout.
-
-References: [FoloToy hardware](docs/hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.md),
-[upstream overview](docs/README.md),
-[Espressif Swift component](https://components.espressif.com/components/espressif/idf_swift/versions/1.0.1/readme?language=en).
+Remote GitHub CI still needs Swift provisioning and the paired framework changes.
+Known unused `BUTTON_VER_*` Swift warnings and the smaller Recovery-partition size
+warning remain; the verified application belongs in the 3 MB factory partition.
