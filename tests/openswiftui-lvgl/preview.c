@@ -31,6 +31,19 @@ static void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
     lv_display_flush_ready(display);
 }
 
+static void capture(lv_display_t *display, const char *path)
+{
+    s_wire = fopen(path, "wb");
+    assert(s_wire);
+    fputs("FPS1 BEGIN 12345678 240 320 RGB565LE\n", s_wire);
+    s_pixels = 0;
+    lv_obj_invalidate(lv_screen_active());
+    lv_refr_now(display);
+    assert(s_pixels == 76800);
+    fprintf(s_wire, "FPS1 END 12345678 %u\n", s_pixels);
+    assert(fclose(s_wire) == 0);
+}
+
 int main(int argc, char **argv)
 {
     assert(argc == 2);
@@ -41,13 +54,7 @@ int main(int argc, char **argv)
     lv_display_set_flush_cb(display, flush);
     passport_swift_prepare();
     demo_openswiftui_enter();
-    s_wire = fopen(argv[1], "wb");
-    assert(s_wire);
-    fputs("FPS1 BEGIN 12345678 240 320 RGB565LE\n", s_wire);
-    lv_refr_now(display);
-    assert(s_pixels == 76800);
-    fprintf(s_wire, "FPS1 END 12345678 %u\n", s_pixels);
-    assert(fclose(s_wire) == 0);
+    capture(display, argv[1]);
     passport_scene_geometry_t geometry;
     assert(passport_scene_get_geometry(&geometry));
     assert(geometry.screen_width == 240 && geometry.screen_height == 320);
@@ -71,6 +78,35 @@ int main(int argc, char **argv)
     lv_obj_update_layout(probe);
     assert(lv_obj_get_height(probe) == wrapped_h);
     lv_obj_delete(probe);
+    // Drive the real page's physical-key adapter, verifying visual state and
+    // ownership without needing ADC hardware. Only CLICK changes the scene.
+    lv_obj_t *screen = lv_screen_active();
+    lv_obj_t *scene = lv_obj_get_child(screen, -1);
+    assert(lv_obj_get_child_count(scene) == 8);
+    lv_obj_t *first = lv_obj_get_child(scene, 0);
+    demo_openswiftui_key(BSP_BTN_DOWN, BSP_BTN_PRESS);
+    demo_openswiftui_key(BSP_BTN_DOWN, BSP_BTN_DOUBLE);
+    demo_openswiftui_key(BSP_BTN_OK, BSP_BTN_LONG);
+    demo_openswiftui_key((bsp_btn_t)99, BSP_BTN_CLICK);
+    assert(lv_obj_get_child(scene, 0) == first);
+    demo_openswiftui_key(BSP_BTN_DOWN, BSP_BTN_CLICK);
+    assert(lv_screen_active() == screen && lv_obj_get_child(screen, -1) == scene);
+    assert(lv_color_eq(lv_obj_get_style_bg_color(lv_obj_get_child(scene, 1), 0), lv_color_hex(0x244d38)));
+    char action_path[1024];
+    assert(snprintf(action_path, sizeof(action_path), "%s.down", argv[1]) < (int)sizeof(action_path));
+    capture(display, action_path);
+    demo_openswiftui_key(BSP_BTN_UP, BSP_BTN_CLICK);
+    assert(lv_color_eq(lv_obj_get_style_bg_color(lv_obj_get_child(scene, 1), 0), lv_color_hex(0x243857)));
+    demo_openswiftui_key(BSP_BTN_OK, BSP_BTN_CLICK);
+    assert(lv_obj_get_child_count(scene) == 7);
+    assert(snprintf(action_path, sizeof(action_path), "%s.hidden", argv[1]) < (int)sizeof(action_path));
+    capture(display, action_path);
+    demo_openswiftui_key(BSP_BTN_OK, BSP_BTN_CLICK);
+    assert(lv_obj_get_child_count(scene) == 8);
+    for (unsigned i = 0; i < 500; ++i) {
+        demo_openswiftui_key(BSP_BTN_OK, BSP_BTN_CLICK);
+        assert(lv_obj_get_child_count(scene) == (i % 2 ? 8 : 7));
+    }
     // Exercise real LVGL sink rejection and lifecycle behavior after capture.
     assert(!passport_scene_begin(73));
     assert(!passport_scene_image(0, 0, 16, 16, (const uint8_t *)"wrong", 5));
@@ -80,7 +116,13 @@ int main(int argc, char **argv)
     demo_openswiftui_exit();
     for (unsigned i = 0; i < 20; ++i) {
         demo_openswiftui_enter();
+        scene = lv_obj_get_child(lv_screen_active(), -1);
+        assert(lv_obj_get_child_count(scene) == 8);
+        assert(lv_color_eq(lv_obj_get_style_bg_color(lv_obj_get_child(scene, 1), 0), lv_color_hex(0x243857)));
+        demo_openswiftui_key(BSP_BTN_OK, BSP_BTN_CLICK);
         demo_openswiftui_exit();
+        demo_openswiftui_key(BSP_BTN_DOWN, BSP_BTN_CLICK);
+        assert(!passport_scene_reset());
     }
     // Root configuration follows the real LVGL display, not duplicated Swift constants.
     lv_display_set_resolution(display, 320, 360);
@@ -90,6 +132,6 @@ int main(int argc, char **argv)
     demo_openswiftui_exit();
     lv_display_delete(display);
     lv_deinit();
-    puts("Headless LVGL: PASS (76800 pixels, real C sink, real font wrapping, display resize, asset rejection, node limit, 20 lifecycles)");
+    puts("Headless LVGL: PASS (76800 pixels, real C sink, real font wrapping, display resize, three button closures, 500 redraws, asset rejection, node limit, 20 state resets)");
     return 0;
 }

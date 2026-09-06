@@ -17,6 +17,7 @@
 #include "esp_sleep.h"
 #include "swift/PassportBridge.h"
 #include "screen_capture.h"
+#include "physical_input.h"
 
 static const char *TAG = "main";
 
@@ -41,9 +42,6 @@ static lv_obj_t *s_rows[DEMO_COUNT];
 static lv_obj_t *s_mascot;
 static int  s_sel;                 // 当前选中项
 static int  s_active = -1;         // 当前所在演示页;-1 = 在菜单
-// Protected by the LVGL lock. Ignore input until all BSP/Swift startup work
-// and the initial menu have completed, including the optional battery read.
-static bool s_ready;
 
 static void menu_refresh(void) {
     for (size_t i = 0; i < DEMO_COUNT; i++) {
@@ -76,16 +74,13 @@ static void menu_build(void) {
 }
 
 static void enter_menu(void) {
+    physical_input_advance_page();
     s_active = -1;
     menu_build();
 }
 
-// 按键回调运行在 button 组件的任务里,操作 LVGL 必须加锁。
-static void on_key(bsp_btn_t btn, bsp_btn_ev_t ev, void *user) {
-    (void)user;
-    if (!bsp_lvgl_lock(500)) return;
-    if (!s_ready) { bsp_lvgl_unlock(); return; }
-
+// Called only by LVGL's timer task, already inside its serialized UI context.
+static void dispatch_key(bsp_btn_t btn, bsp_btn_ev_t ev) {
     if (s_active >= 0) {
         if (btn == BSP_BTN_OK && ev == BSP_BTN_LONG) {     // 统一返回
             DEMOS[s_active].exit();
@@ -97,6 +92,7 @@ static void on_key(bsp_btn_t btn, bsp_btn_ev_t ev, void *user) {
         if (btn == BSP_BTN_UP)   { s_sel = (s_sel + DEMO_COUNT - 1) % DEMO_COUNT; menu_refresh(); }
         if (btn == BSP_BTN_DOWN) { s_sel = (s_sel + 1) % DEMO_COUNT;              menu_refresh(); }
         if (btn == BSP_BTN_OK && s_ok[s_sel]) {
+            physical_input_advance_page();
             s_active = s_sel;
             ui_pixel_mascot_jump(s_mascot);
             lv_obj_delete(s_menu_scr);
@@ -107,7 +103,6 @@ static void on_key(bsp_btn_t btn, bsp_btn_ev_t ev, void *user) {
             ui_pixel_mascot_jump(s_mascot);
         }
     }
-    bsp_lvgl_unlock();
 }
 
 void app_main(void) {
@@ -132,7 +127,13 @@ void app_main(void) {
 
     // 其余外设单项失败不阻塞:菜单里标 [FAIL],其他项照常可测。
     s_ok[0] = true;                                   // Display 已确认可用
-    s_ok[1] = (bsp_button_init(on_key, NULL) == ESP_OK);
+    bool input_ready = false;
+    if (bsp_lvgl_lock(1000)) {
+        input_ready = physical_input_init(dispatch_key);
+        bsp_lvgl_unlock();
+    }
+    s_ok[1] = input_ready && (bsp_button_init(physical_input_enqueue, NULL) == ESP_OK);
+    if (!s_ok[1]) ESP_LOGE(TAG, "Input dispatcher or button driver unavailable");
     s_ok[2] = (bsp_audio_init() == ESP_OK);
     s_ok[3] = (bsp_battery_init() == ESP_OK);
     s_ok[4] = true;                                    // 页面内按需初始化并显示错误
@@ -144,11 +145,11 @@ void app_main(void) {
     passport_swift_prepare();
 
     if (bsp_lvgl_lock(1000)) {
-        // This display-only experiment starts directly in ContentView.
+        // Start directly in ContentView, retaining long-OK navigation.
         // The existing long-OK route can still return to the hardware menu.
         s_active = 7;
         DEMOS[s_active].enter();
-        s_ready = true;
+        physical_input_start();
         bsp_lvgl_unlock();
     }
 

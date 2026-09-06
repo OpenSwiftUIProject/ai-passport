@@ -2,18 +2,21 @@
 
 # AI Passport — OpenSwiftUI Embedded display
 
-The `embed/folotoy` branch builds a static-display profile of OpenSwiftUI for
+The `embed/folotoy` branch builds an Embedded display/input profile of OpenSwiftUI for
 FoloToy's ESP32-C3. Edit `main/swift/ContentView.swift` to describe the screen:
 
 ```swift
 import OpenSwiftUI
 
 struct ContentView: View {
+    @State private var useBlue = false
+    @State private var showImage = true
+
     var body: some View {
         VStack(spacing: 12) {
-            Image("spark")
-                .resizable()
-                .frame(width: 80, height: 80)
+            if showImage {
+                Image("spark").resizable().frame(width: 80, height: 80)
+            }
             Text("Hello, OpenSwiftUI!")
             HStack(spacing: 8) {
                 Color.red.frame(width: 32, height: 8)
@@ -21,7 +24,10 @@ struct ContentView: View {
             }
         }
         .padding(12)
-        .background(Color(white: 0.1))
+        .background(useBlue ? Color.blue : Color.black)
+        .onPhyicButton(.up) { useBlue = false }
+        .onPhyicButton(.down) { useBlue = true }
+        .onPhyicButton(.ok) { showImage.toggle() }
     }
 }
 ```
@@ -30,12 +36,13 @@ The framework is compiled separately into `OpenSwiftUI.swiftmodule` and
 `libOpenSwiftUI.a`, then imported and linked by the firmware. The shared View
 protocol, builder, empty and conditional views are compiled with an explicit
 Embedded configuration; platform-dependent primitives have small Embedded
-implementations. This is a **static display subset**, not the desktop
+implementations. This is a **bounded Embedded subset**, not the desktop
 AttributeGraph/RenderBox renderer or a full SwiftUI-compatible runtime.
 
-The board starts directly in the View display. This page adds no input behavior.
-The inherited long-OK action returns to the hardware menu, whose `OpenSwiftUI`
-entry opens it again. The original counter model/adapter remain as regression
+The board starts in ContentView. UP/DOWN cycle the panel palette; OK toggles
+the image. These single-click closures update root `@State` and trigger measured
+layout and scene replacement. Long OK returns to the hardware menu; reopening
+`OpenSwiftUI` creates fresh state. The original counter model/adapter remain as regression
 tests. The FoloToy sky/grass/header and boot battery snapshot surround the scene.
 
 ## Workspace and build
@@ -92,6 +99,8 @@ See the [initial toolchain/deployment record](docs/development/engineering/embed
 | `Image("spark")`, `.resizable()` | Intrinsic asset size by default; resizable images accept size proposals with nearest-neighbor scaling |
 | `Text("literal")`, `.foregroundStyle(Color)` | Actual Montserrat 14 measurement and width-dependent wrapping; no dynamic localization or CJK font |
 | `VStack`, `HStack`, `VStackLayout`, `HStackLayout` | Measure/place layout, explicit spacing, edge/center alignment, and flexible-space distribution |
+| `onPhyicButton(.up/.down/.ok) { ... }` | Synchronous single-click closures; first matching handler consumes the event |
+| `@State`, `EmbeddedViewHost { ContentView() }` | Retained root state; writes invalidate the host and redraw through the existing layout |
 | `RootGeometry` | Physical screen size and content insets, root size proposal and centering |
 | `Layout` | Custom generic layouts with a typed cache and separate size/placement phases |
 | `ZStack`, `.frame`, `.padding`, `.background`, `.offset` | Measured overlays and modifiers; offset changes drawing, not the space reported to a parent |
@@ -107,13 +116,33 @@ The Embedded `Layout` contract uses integer pixel geometry and generic,
 index-based child access. Its measure/place flow and flexibility probes follow
 the framework's layout model; the desktop AttributeGraph `RootGeometry` rule
 and full `StackLayout` engine are not linked. Default spacing is a constant
-8 pixels. Baseline/RTL alignment, layout priorities, Spacer, dynamic layout,
-state/observation, animation, SF Symbols and runtime image decoding remain
+8 pixels. Baseline/RTL alignment, layout priorities, Spacer,
+full graph-backed state/observation, animation, SF Symbols and runtime image decoding remain
 outside this profile. Unimplemented APIs are unavailable at compile time.
+
+`onPhyicButton` uses the requested spelling. Matching outer modifiers take
+precedence; otherwise containers visit children in declaration order and stop
+at the first match. Absent branches receive no events. This is a board input
+modifier with no focus or hit-testing requirement. PRESS, DOUBLE and LONG do
+not invoke the page's single-click closures.
+
+Construct the root inside `EmbeddedViewHost`'s builder and retain that host until
+exit. This profile supports `@State` in that retained root and stored children;
+new stateful children constructed during `body` evaluation are unsupported and
+fail explicitly, rather than silently resetting state. There is no `$state`
+binding projection, automatic structural identity, observation or asynchronous
+state scheduling. All state/action/render access must use the serialized UI
+context. The firmware redraws after an action only when the host is invalidated.
+
+The BSP callback enqueues without waiting. An app-lifetime LVGL timer drains at
+most 16 events every 16 ms; overflow drops new events and reports a warning.
+Page generations discard queued events from an exited page. Redraw replaces
+only scene children, keeping the title, battery and content container. Sink
+failures retain state for the next action to retry; page exit releases the host.
 
 The C scene sink owns LVGL objects under the existing LVGL lock. It permits at
 most 32 drawing nodes, rejects invalid coordinates and unknown assets, copies
-bounded text, and deletes all scene objects on exit. The sample uses 8 nodes.
+bounded text, and deletes all scene objects on exit. The sample uses 8 nodes, or 7 with the image hidden.
 No full-screen framebuffer is added to the MCU. The sample image is 512 bytes
 of constant RGB565 Flash data; see [assets](assets/README.md).
 
@@ -128,7 +157,8 @@ The preview builds the same pinned LVGL sources on the host and uses the real
 C scene sink, actual `ContentView`, framework module and pixel asset. It renders
 240x320 RGB565 pixels and saves PNG through the checked screenshot protocol.
 Its battery is an explicit **73% host fixture**; it is not a device screenshot.
-The preview additionally checks unknown assets, node limits and 20 page lifecycles.
+The preview also checks physical-key filtering, palette/image state, 500 redraws,
+unknown assets, node limits and 20 page lifecycles with state reset.
 It requires `managed_components/lvgl__lvgl` to have been resolved by an IDF build.
 
 Host tests also exercise the actual framework/client module boundary, nested

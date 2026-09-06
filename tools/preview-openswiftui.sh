@@ -41,9 +41,12 @@ from pathlib import Path
 import sys
 sys.path.insert(0, "tools")
 from capture_screen import Frame, save_png
-frame = Frame("12345678")
-for line in Path(sys.argv[1]).read_bytes().splitlines():
-    frame.accept(line)
-save_png(frame, Path(sys.argv[2]).expanduser().resolve())
-print("Host LVGL preview saved:", sys.argv[2])
+output = Path(sys.argv[2]).expanduser().resolve()
+for wire_suffix, image_suffix in [("", ""), (".down", "-down"), (".hidden", "-hidden")]:
+    frame = Frame("12345678")
+    for line in Path(sys.argv[1] + wire_suffix).read_bytes().splitlines():
+        frame.accept(line)
+    destination = output.with_name(output.stem + image_suffix + output.suffix)
+    save_png(frame, destination)
+    print("Host LVGL preview saved:", destination)
 PYTHON

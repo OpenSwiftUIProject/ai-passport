@@ -28,6 +28,11 @@ run_static_checks() {
         tests/test_ui_pixel_math.c main/ui_pixel_math.c \
         -o "${test_dir}/test_ui_pixel_math"
     "${test_dir}/test_ui_pixel_math"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
+        -Itests/physical-input/include -Itests/swift-interop/include -Icomponents/bsp/include \
+        tests/physical-input/test_dispatch.c main/physical_input.c \
+        -o "${test_dir}/test_physical_input"
+    "${test_dir}/test_physical_input"
     python3 tests/test_verify_firmware.py
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
         tests/test_screen_protocol.c main/screen_protocol.c \

@@ -1,5 +1,6 @@
 idf_component_register(
     SRCS "main.c"
+         "physical_input.c"
          "ui_pixel.c"
          "ui_pixel_math.c"
          "demo_display.c"

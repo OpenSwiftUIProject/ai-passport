@@ -5,9 +5,63 @@
 Recorded 2026-09-06 on `embed/folotoy`. Firmware baseline: `85382aa`;
 OpenSwiftUI baseline: `01cb28f6`. These are local prototype changes.
 
-## Profile 2: measured layout (current)
+## Profile 3: physical buttons and retained root State (current)
 
-The current ContentView uses VStack/HStack, padding and backgrounds, with no
+The current ContentView declares root `@State` values for its palette and image
+visibility. `.onPhyicButton(.up/.down/.ok)` closures change those values; a
+retained `EmbeddedViewHost` invalidates and reruns RootGeometry/layout before
+replacing scene children. UP/DOWN cycle the palette, OK toggles the image and
+long OK keeps its global menu-return behavior. Reentry resets state.
+
+The app dispatches the BSP events through a bounded, nonblocking queue to a
+16 ms LVGL timer. Page generations reject stale queued input after navigation.
+The normal OpenSwiftUI State/GraphHost implementation is not linked; this
+profile supports State constructed in retained root/stored-child values only.
+Stateful children newly constructed in `body`, Binding projection and general
+dynamic view identity remain unsupported. No other framework repo was changed.
+
+| Check | Result |
+| --- | --- |
+| Build | PASS: full isolated ESP32-C3 gate and merged-image contract |
+| Host tests | PASS: framework input/layout/rendering, actual Swift/C ContentView, queue ordering/overflow/startup/page epochs and allocation failures |
+| LVGL preview | PASS: 500 redraws, single-click filtering, three key actions, stable scene shell, state reset over 20 lifecycles; initial/down/hidden frames each cover 76,800 pixels |
+| RISC-V framework | PASS: 35 selected sources, 73,838-byte intermediate archive |
+| Application | PASS: 1,557,232 bytes (+7,184 from profile 2), below the 3 MB limit |
+| Normal profile | Syntax parse PASS; full desktop build NOT RUN |
+| Device tests | PASS: app-only deployment/digest, protected ranges, profile 3 startup and three CRC-checked USB screenshots; physical-key actions not tested |
+| Unverified | ADC timing/debounce, physical key response, long-OK navigation, peak heap during interaction, LVGL task stack margin and repeated interactive use |
+
+The C atomic operations use GCC/Clang builtins because the Swift component's
+C++ include paths shadow the C `stdatomic.h` header. The final complete gate
+passed with the same implementation on the host and ESP32-C3.
+
+Logs: `FoloToy/work/logs/openswiftui-input-full-validation-final.log`,
+`openswiftui-input-preview.log`, and `openswiftui-input-default-parse.log`.
+The previews use a 73% fixture battery and are host renders, not device captures.
+Staging: `FoloToy/work/deployment/openswiftui-input-088515ef/` (uncommitted source hashes in its manifest).
+App SHA-256: `5dc10e17859c2383e347ad1f21a30afa10a71bac78b25fbf011e54c65f739410`.
+Merged SHA-256: `088515eff9d83d21a9e6e57f483339d1d6ae869b2e99ffc61bb9229516588636`.
+Only the staged app may be written at `0x10000` to the legacy unit after its
+protected ranges are rechecked; the merged file is not its deployment payload.
+
+Profile 3 was deployed on 2026-09-06. Before writing, the current 3 MB app
+partition was backed up with a verified digest; its prefix (including current
+NVS) was privately snapshotted. Only 1,557,232 application
+bytes at `0x10000` were written. The application digest and both protected ranges
+matched after writing. Startup rendered 8 nodes and initialized the three-button
+driver; scene free heap was 158,488 bytes. No panic
+or watchdog was seen during the 35-second boot observation.
+
+Three no-reset USB captures each verified all 76,800 pixels. Their free heap was
+150,428 bytes; screenshot-worker stack margin
+was 4,300 bytes (not the
+LVGL task's stack). Private deployment/capture reports and the rollback snapshot
+are archived in `FoloToy/work/device-backups/20260906T044501Z/openswiftui-input-088515ef/`.
+The physical buttons have not yet been exercised for this profile.
+
+## Profile 2: measured layout (historical)
+
+The profile 2 ContentView uses VStack/HStack, padding and backgrounds, with no
 ZStack or offset. The platform supplies its actual LVGL screen size and theme
 insets before rendering: RootGeometry turns 240x320 into a 216x224 proposal,
 measures the root and centers its fitted bounds. Text is measured using the

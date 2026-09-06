@@ -6,6 +6,9 @@
 
 ## Unreleased
 
+- Added physical-button closures with `onPhyicButton`, retained root `@State`, measured redraws, nonblocking event dispatch and page-lifecycle/input regression tests.
+
+
 - Added measured VStack/HStack layout and configurable RootGeometry, real font/image sizing, padding/background and intrinsic/resizable images; the sample no longer uses offsets.
 
 - Added an OpenSwiftUI Embedded display profile integration, a boot-visible

@@ -5,7 +5,55 @@
 记录日期 2026-09-06，分支 `embed/folotoy`。固件基线 `85382aa`，
 OpenSwiftUI 基线 `01cb28f6`，均为本地原型修改。
 
-## 配置 2：测量布局（当前版本）
+## Profile 3：物理按键与保留的根视图 State（当前）
+
+当前 ContentView 在根视图声明配色和图片显示两个 `@State` 值。
+`.onPhyicButton(.up/.down/.ok)` closure 更新状态，保留的 `EmbeddedViewHost`
+失效后重新执行 RootGeometry／布局，再替换场景子节点。UP/DOWN 循环配色，
+OK 切换图片，长按 OK 保留全局返回菜单行为；重新进入会重置状态。
+
+应用通过有界、非阻塞队列将 BSP 事件交给 16 ms LVGL timer；页面代次丢弃导航后
+遗留的队列事件。没有链接正常 OpenSwiftUI State／GraphHost 实现；本配置只支持
+在保留的根视图及存储子视图中构造的 State。`body` 中新构造的有状态子视图、
+Binding 投影和通用动态视图身份仍未支持。没有改动其他 framework 仓库。
+
+| 检查 | 结果 |
+| --- | --- |
+| Build | PASS：完整隔离 ESP32-C3 门禁与合并镜像契约 |
+| Host tests | PASS：框架输入／布局／渲染、真实 Swift/C ContentView、队列顺序／溢出／启动／页面代次和分配失败 |
+| LVGL 预览 | PASS：500 次重绘、单击过滤、三键操作、场景外壳保留、20 次生命周期状态重置；初始／DOWN／隐藏图片三帧各覆盖 76,800 像素 |
+| RISC-V 框架 | PASS：35 个选中源文件，73,838 字节中间静态库 |
+| 应用 | PASS：1,557,232 字节，比 profile 2 增加 7,184 字节，低于 3 MB 上限 |
+| 正常配置 | 语法解析 PASS；完整桌面构建 NOT RUN |
+| Device tests | PASS：仅应用部署／摘要、保护区域、profile 3 启动与三次 CRC 校验 USB 截图；物理按键操作未测试 |
+| Unverified | ADC 时序／消抖、物理按键响应、长按 OK 导航、交互时峰值堆、LVGL 任务栈余量及实机反复交互 |
+
+C 原子操作使用 GCC/Clang 内建函数，因为 Swift 组件的 C++ include 路径遮住了
+C `stdatomic.h`。最终完整门禁已通过，主机和 ESP32-C3 使用同一份实现。
+
+日志：`FoloToy/work/logs/openswiftui-input-full-validation-final.log`、
+`openswiftui-input-preview.log` 和 `openswiftui-input-default-parse.log`。
+预览电量为 73% 测试值，是主机渲染，不是设备截图。
+暂存：`FoloToy/work/deployment/openswiftui-input-088515ef/`，manifest 保存未提交源码摘要。
+应用 SHA-256：`5dc10e17859c2383e347ad1f21a30afa10a71bac78b25fbf011e54c65f739410`。
+合并 SHA-256：`088515eff9d83d21a9e6e57f483339d1d6ae869b2e99ffc61bb9229516588636`。
+旧设备只有暂存的应用可在重新检查保护区域后写到 `0x10000`；合并文件不用于
+这台设备的直接部署。
+
+Profile 3 已于 2026-09-06 部署。写入前备份并校验了当前 3 MB 应用分区，
+并私下保存前缀区域（包括当前 NVS）。仅在 `0x10000` 写入
+1,557,232 字节应用，写入后应用摘要与两个保护区域校验均通过。
+启动渲染 8 个节点、三键驱动初始化成功，场景空闲堆为
+158,488 字节；35 秒启动观察内未发现 panic 或 watchdog。
+
+三次无复位 USB 截图各校验了完整 76,800 像素；空闲堆为
+150,428 字节，截图工作任务栈余量为
+4,300 字节（不是 LVGL 任务栈）。
+部署／截图私有记录与回滚快照保存在
+`FoloToy/work/device-backups/20260906T044501Z/openswiftui-input-088515ef/`。
+本配置的物理按键操作尚未测试。
+
+## 配置 2：测量布局（历史版本）
 
 当前 ContentView 使用 VStack/HStack、padding 与 background，没有 ZStack 或
 offset。平台先提供 LVGL 实际屏幕尺寸与主题边距；RootGeometry 将 240x320 转成

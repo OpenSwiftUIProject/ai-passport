@@ -28,11 +28,15 @@ void passport_ui_destroy(void);
 // UTF-8 inputs are length-delimited; C copies labels and resolves static assets.
 uint32_t openswiftui_embedded_version(void);
 void passport_content_enter(void);
+void passport_content_exit(void);
+void passport_content_action(int32_t action);
 typedef struct {
     int32_t screen_width, screen_height;
     int32_t top, leading, bottom, trailing;
 } passport_scene_geometry_t;
 bool passport_scene_begin(int32_t boot_battery_percent);
+// Replaces content children while preserving the page shell and battery label.
+bool passport_scene_reset(void);
 bool passport_scene_get_geometry(passport_scene_geometry_t *geometry);
 bool passport_scene_measure_image(const uint8_t *name, uint32_t length, int32_t *width, int32_t *height);
 bool passport_scene_measure_text(const uint8_t *text, uint32_t length, int32_t proposed_width, int32_t *width, int32_t *height);

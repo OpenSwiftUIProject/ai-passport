@@ -6,6 +6,9 @@
 
 ## Unreleased
 
+- 新增 `onPhyicButton` 物理按键 closure、保留的根视图 `@State`、测量重绘、非阻塞事件分发，以及页面生命周期和输入回归测试。
+
+
 - 新增 VStack/HStack 测量布局与可配置 RootGeometry，接入真实字体／图片尺寸，支持 padding/background 和固有／可缩放图片；示例不再使用 offset。
 
 - 接入 OpenSwiftUI Embedded 展示配置，开机展示由颜色、图片及文字组成的

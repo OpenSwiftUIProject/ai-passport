@@ -7,7 +7,8 @@
 #include "../assets/images/spark_rgb565.h"
 #include <string.h>
 
-// Static scene: no timers, workers or input callbacks retain these objects.
+// Page-owned scene; the app's serialized input dispatcher invokes Swift.
+// No page timer, worker or retained input closure outlives this screen.
 static lv_obj_t *s_screen;
 static lv_obj_t *s_scene;
 static unsigned s_nodes;
@@ -60,6 +61,14 @@ bool passport_scene_get_geometry(passport_scene_geometry_t *geometry)
 {
     if (!s_scene || !geometry) return false;
     *geometry = s_geometry;
+    return true;
+}
+
+bool passport_scene_reset(void)
+{
+    if (!s_scene) return false;
+    lv_obj_clean(s_scene);
+    s_nodes = 0;
     return true;
 }
 
@@ -141,8 +150,10 @@ bool passport_scene_text(int32_t x, int32_t y, int32_t width, int32_t height, co
 
 void passport_scene_end(bool succeeded)
 {
+    if (!s_scene) return;
     if (!succeeded) {
         lv_obj_clean(s_scene);
+        s_nodes = 0;
         lv_obj_t *error = ui_pixel_label(s_scene, "View render failed", &lv_font_montserrat_14, UI_INK);
         lv_obj_center(error);
     }
@@ -154,8 +165,19 @@ void passport_scene_end(bool succeeded)
 void demo_openswiftui_enter(void) { passport_content_enter(); }
 void demo_openswiftui_exit(void)
 {
+    passport_content_exit();
     if (s_screen) lv_obj_delete(s_screen);
     s_screen = s_scene = NULL;
     s_nodes = 0;
 }
-void demo_openswiftui_key(bsp_btn_t btn, bsp_btn_ev_t ev) { (void)btn; (void)ev; }
+void demo_openswiftui_key(bsp_btn_t btn, bsp_btn_ev_t ev)
+{
+    // A click executes exactly one closure. Long OK is owned by the app menu.
+    if (ev != BSP_BTN_CLICK || !s_screen) return;
+    switch (btn) {
+    case BSP_BTN_UP: passport_content_action(PASSPORT_ACTION_UP); break;
+    case BSP_BTN_DOWN: passport_content_action(PASSPORT_ACTION_DOWN); break;
+    case BSP_BTN_OK: passport_content_action(PASSPORT_ACTION_OK); break;
+    default: break;
+    }
+}
