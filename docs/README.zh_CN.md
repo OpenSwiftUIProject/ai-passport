@@ -1,5 +1,10 @@
 # FoloToy AI Passport
 
+本分支提供 [Embedded Swift 起步工程](../README.zh_CN.md)，包含主机测试、C BSP 桥接
+及 Swift 硬件演示页面。
+已测试工具链、固件哈希及待执行实机项目见
+[本地验证记录](development/engineering/embedded-swift-validation.zh_CN.md)。
+
 [English](README.md) | 简体中文
 
 FoloToy AI Passport 是一个开放式可穿戴 AI 硬件，本仓库是这款 AI 硬件的开发基线。它不只展示"板子能运行什么"，还把开发应用所需的**硬件事实、稳定接口、资源边界、参考实现和验收方法**放在同一仓库中。

@@ -4,3 +4,8 @@ sdkconfig.old
 managed_components/
 .vscode/
 .idea/
+.build/
+.swiftpm/
+.DS_Store
+__pycache__/
+*.pyc

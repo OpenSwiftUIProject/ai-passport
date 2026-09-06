@@ -29,6 +29,8 @@ run_static_checks() {
         -o "${test_dir}/test_ui_pixel_math"
     "${test_dir}/test_ui_pixel_math"
     python3 tests/test_verify_firmware.py
+    swift test --package-path "${repo_root}"
+    ./tools/test-swift-interop.sh
     rm -rf "${test_dir}"
     echo "Host tests: PASS"
 }

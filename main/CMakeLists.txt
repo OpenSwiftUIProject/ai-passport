@@ -10,6 +10,12 @@ idf_component_register(
          "demo_wifi.c"
          "demo_ble.c"
          "demo_low_power.c"
+         "demo_swift.c"
     INCLUDE_DIRS "."
-    REQUIRES bsp bt esp_event esp_hw_support esp_netif esp_timer esp_wifi nvs_flash
+    REQUIRES bsp bt esp_event esp_hw_support esp_netif esp_timer esp_wifi nvs_flash idf_swift
+)
+
+idf_component_register_swift(${COMPONENT_LIB}
+    BRIDGING_HEADER "${CMAKE_CURRENT_LIST_DIR}/swift/PassportBridge.h"
+    SRCS "swift/PassportCore/PassportState.swift" "swift/PassportDemo.swift"
 )

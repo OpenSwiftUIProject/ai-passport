@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Passport Embedded Swift"
+  short_description: "Build and test Swift firmware with FoloToy's C BSP"
+  default_prompt: "Use $embedded-swift-passport to develop and validate the next Swift firmware feature in this project."

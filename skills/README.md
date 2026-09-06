@@ -12,6 +12,7 @@ Each skill must contain at least `SKILL.md` with YAML frontmatter defining `name
 
 | Skill | What it does |
 | --- | --- |
+| [embedded-swift-passport](embedded-swift-passport/SKILL.md) | Build and test this project's Embedded Swift application, C BSP bridge, and firmware. |
 | [issue-suggestions](issue-suggestions/SKILL.md) | After a release, collect the releasing developer's own improvement points and file them as feature request issues against the upstream project. |
 | [experience-pr](experience-pr/SKILL.md) | After a release, collect reusable development experience and submit it as a documentation pull request. |
 | [plays-archive](plays-archive/SKILL.md) | After a release, archive the published application into the upstream `plays/` with an AI-generated bilingual summary and a cover image. |
