@@ -2,7 +2,7 @@
 
 # AI Passport — OpenSwiftUI Embedded 展示
 
-`embed/folotoy` 分支为 FoloToy ESP32-C3 编译 OpenSwiftUI Embedded 展示与输入配置。
+本 fork 的 `main` 分支为 FoloToy ESP32-C3 编译 OpenSwiftUI Embedded 展示与输入配置。
 修改 `main/swift/ContentView.swift` 即可描述画面：
 
 ```swift
@@ -53,7 +53,7 @@ OpenSwiftUI-Mono 可选，无需额外克隆框架依赖的脚本。
 
 ```text
 FoloToy/
-  ai-passport/                 固件，embed/folotoy 分支
+  ai-passport/                 OpenSwiftUIProject 固件 fork，main 分支
   framework/
     OpenSwiftUI/               独立克隆，embed/folotoy 分支
     build/riscv32/             独立框架编译产物
@@ -62,13 +62,12 @@ FoloToy/
   work/                       日志、预览与部署暂存，不在源码仓库中
 ```
 
-首次克隆时，将 `<ai-passport-repository-url>` 替换为你的固件仓库或 fork 地址。
-OpenSwiftUI 分支已发布在其上游仓库中：
+首次克隆时，获取本固件 fork 的 `main` 分支与 OpenSwiftUI 的 `embed/folotoy` 分支：
 
 ```bash
 mkdir -p FoloToy/framework
 cd FoloToy
-git clone --single-branch --branch embed/folotoy <ai-passport-repository-url> ai-passport
+git clone --single-branch --branch main https://github.com/OpenSwiftUIProject/ai-passport.git ai-passport
 git clone --single-branch --branch embed/folotoy https://github.com/OpenSwiftUIProject/OpenSwiftUI.git framework/OpenSwiftUI
 cd ai-passport
 ```

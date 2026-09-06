@@ -2,7 +2,7 @@
 
 # AI Passport — OpenSwiftUI Embedded display
 
-The `embed/folotoy` branch builds an Embedded display/input profile of OpenSwiftUI for
+This fork's `main` branch builds an Embedded display/input profile of OpenSwiftUI for
 FoloToy's ESP32-C3. Edit `main/swift/ContentView.swift` to describe the screen:
 
 ```swift
@@ -57,7 +57,7 @@ The minimal sibling layout is:
 
 ```text
 FoloToy/
-  ai-passport/                 firmware, branch embed/folotoy
+  ai-passport/                 OpenSwiftUIProject firmware fork, branch main
   framework/
     OpenSwiftUI/               standalone clone, branch embed/folotoy
     build/riscv32/             standalone framework output
@@ -66,14 +66,13 @@ FoloToy/
   work/                       ignored-by-location logs, previews and staging
 ```
 
-For a fresh checkout, use your firmware repository or fork URL for
-`<ai-passport-repository-url>`. OpenSwiftUI's branch is available in its upstream
-repository:
+For a fresh checkout, clone this firmware fork's `main` branch and OpenSwiftUI's
+`embed/folotoy` branch:
 
 ```bash
 mkdir -p FoloToy/framework
 cd FoloToy
-git clone --single-branch --branch embed/folotoy <ai-passport-repository-url> ai-passport
+git clone --single-branch --branch main https://github.com/OpenSwiftUIProject/ai-passport.git ai-passport
 git clone --single-branch --branch embed/folotoy https://github.com/OpenSwiftUIProject/OpenSwiftUI.git framework/OpenSwiftUI
 cd ai-passport
 ```
