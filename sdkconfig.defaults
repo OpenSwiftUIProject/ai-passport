@@ -28,12 +28,14 @@ CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
 CONFIG_ESP_CONSOLE_SECONDARY_NONE=y
 
 # --- LVGL ---
+# Measured 2048 layout exhausted the port's 7 KiB stack; retain interrupt margin.
+CONFIG_BSP_LVGL_TASK_STACK_SIZE=12288
 CONFIG_LV_COLOR_DEPTH_16=y
 CONFIG_LV_FONT_MONTSERRAT_14=y
 CONFIG_LV_FONT_MONTSERRAT_20=y
 # LVGL 内置 malloc 池大小(KB)。它是独立静态区、不与系统堆共享,配大了会白白占用 RAM。
-# 本 demo UI 简单,24KB 足够;若自建复杂界面出现绘制卡死/看门狗,调大此值。
-CONFIG_LV_MEM_SIZE_KILOBYTES=24
+# 2048 动画满盘含背景和分数最多 58 个绘图节点；48KB 留出对象、字体与临时绘制余量。
+CONFIG_LV_MEM_SIZE_KILOBYTES=48
 
 # --- 系统 ---
 CONFIG_FREERTOS_HZ=1000

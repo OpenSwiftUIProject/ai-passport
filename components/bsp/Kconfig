@@ -1,0 +1,9 @@
+menu "FoloToy board support"
+    config BSP_LVGL_TASK_STACK_SIZE
+        int "LVGL task stack size in bytes"
+        range 7168 32768
+        default 7168
+        help
+            Includes synchronous page callbacks and layout in the LVGL task.
+            Embedded Swift pages need additional stack for generic view trees.
+endmenu

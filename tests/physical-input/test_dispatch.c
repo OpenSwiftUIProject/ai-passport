@@ -68,6 +68,10 @@ int main(void) {
     assert(s_delivered == 3 && s_buttons[0] == BSP_BTN_UP && s_events[0] == BSP_BTN_PRESS);
     assert(s_buttons[1] == BSP_BTN_UP && s_events[1] == BSP_BTN_CLICK);
     assert(s_buttons[2] == BSP_BTN_DOWN && s_events[2] == BSP_BTN_DOUBLE);
+    physical_input_enqueue(BSP_BTN_OK, BSP_BTN_PRESS, NULL);
+    physical_input_enqueue(BSP_BTN_OK, BSP_BTN_RELEASE, NULL);
+    s_tick(&s_timer);
+    assert(s_delivered == 5 && s_events[3] == BSP_BTN_PRESS && s_events[4] == BSP_BTN_RELEASE);
     s_delivered = 0; s_change_page = true;
     physical_input_enqueue(BSP_BTN_OK, BSP_BTN_LONG, NULL);
     physical_input_enqueue(BSP_BTN_DOWN, BSP_BTN_CLICK, NULL);

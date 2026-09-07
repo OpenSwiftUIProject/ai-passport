@@ -19,7 +19,7 @@ cd "${repo_root}"
 includes=(-Itests/openswiftui-lvgl/include -Itests/swift-interop/include -Imain -Imain/swift \
     -Icomponents/bsp/include -Imanaged_components/lvgl__lvgl -Itests/openswiftui-lvgl \
     -DLV_CONF_INCLUDE_SIMPLE -DLV_KCONFIG_IGNORE)
-for source in main/demo_openswiftui.c main/ui_pixel.c main/ui_pixel_math.c main/screen_protocol.c tests/openswiftui-lvgl/preview.c; do
+for source in main/demo_openswiftui.c main/openswiftui_scene.c main/demo_2048.c main/ui_pixel.c main/ui_pixel_math.c main/screen_protocol.c tests/openswiftui-lvgl/preview.c; do
     "${CC:-cc}" -std=c11 -O2 "${includes[@]}" -c "${source}" -o "${preview_build}/$(basename "${source}" .c).o"
 done
 host_flags=()
@@ -31,6 +31,9 @@ swiftc -enable-experimental-feature Embedded -wmo -Osize -parse-as-library \
     -import-bridging-header main/swift/PassportBridge.h \
     main/swift/PassportCore/PassportState.swift main/swift/PassportDemo.swift \
     main/swift/ContentView.swift main/swift/PassportSceneSink.swift main/swift/PassportContent.swift \
+    main/swift/PassportCore/Game2048.swift main/swift/Game2048/*.swift \
+    tests/openswiftui-lvgl/Game2048Fixtures.swift \
+    "${preview_build}/openswiftui_scene.o" "${preview_build}/demo_2048.o" \
     "${preview_build}/demo_openswiftui.o" "${preview_build}/ui_pixel.o" "${preview_build}/ui_pixel_math.o" \
     "${preview_build}/screen_protocol.o" "${preview_build}/preview.o" \
     "${preview_build}/swift/libOpenSwiftUI.a" "${preview_build}/lvgl/lib/liblvgl.a" \
@@ -42,7 +45,10 @@ import sys
 sys.path.insert(0, "tools")
 from capture_screen import Frame, save_png
 output = Path(sys.argv[2]).expanduser().resolve()
-for wire_suffix, image_suffix in [("", ""), (".down", "-down"), (".hidden", "-hidden")]:
+for wire_suffix, image_suffix in [("", ""), (".down", "-down"), (".hidden", "-hidden"),
+                                 (".2048", "-2048"), (".2048-horizontal", "-2048-horizontal"),
+                                 (".2048-tiles", "-2048-tiles"), (".2048-won", "-2048-won"),
+                                 (".2048-lost", "-2048-lost")] + [(f".2048-animation-{i}", f"-2048-animation-{i}") for i in range(6)] + [(f".2048-motion-{i:02d}", f"-2048-motion-{i:02d}") for i in range(27)]:
     frame = Frame("12345678")
     for line in Path(sys.argv[1] + wire_suffix).read_bytes().splitlines():
         frame.accept(line)

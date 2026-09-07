@@ -6,6 +6,13 @@
 
 ## Unreleased
 
+- Fixed 2048 stack-protection resets with a measured LVGL task stack budget; excluded layout/idle time from animation phase clocks, suppressed unchanged LVGL updates and normal per-move USB logs, and made slide/reveal stages more visible.
+- Added layout-driven OpenSwiftUI 2048 slide/merge/spawn animations, identified tiles, reusable LVGL objects, an elapsed-time page clock and a bounded input FIFO; expanded host checks to animation frames and mid-animation exit.
+
+- Increased the bounded LVGL pool from 24 KB to 48 KB for the 2048 scene; host previews now use the bounded allocator and check full-board text bounds and pool integrity.
+
+- Added an OpenSwiftUI 2048 menu demo with measured stack layout, retained game state, axis-switching three-button controls, press/release input without double-click delay, pure Swift rule tests, and real LVGL board/end-state previews.
+
 - Added physical-button closures with `onPhyicButton`, retained root `@State`, measured redraws, nonblocking event dispatch and page-lifecycle/input regression tests.
 
 

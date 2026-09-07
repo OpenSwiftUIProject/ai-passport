@@ -137,7 +137,7 @@ Wi-Fi、NimBLE 和 light/deep sleep 直接使用 ESP-IDF API，不属于板级 B
 
 ### 5.2 LVGL 内存和线程规则
 
-ESP32-C3 无 PSRAM。当前 LVGL 显示缓冲为 `240 × 20` 像素的单 DMA 缓冲，RGB565 约 9.6 KB；`sdkconfig.defaults` 的 LVGL 内部池为 24 KB。不要直接改为大行数双缓冲，也不要扩大 UI 内存池而不检查内部 RAM、最大连续堆和 I2S DMA 初始化。
+ESP32-C3 无 PSRAM。当前 LVGL 显示缓冲为 `240 × 20` 像素的单 DMA 缓冲，RGB565 约 9.6 KB；`sdkconfig.defaults` 的 LVGL 内部池为 48 KB。不要直接改为大行数双缓冲，也不要扩大 UI 内存池而不检查内部 RAM、最大连续堆和 I2S DMA 初始化。
 
 LVGL 非线程安全：
 
@@ -171,6 +171,9 @@ LVGL 非线程安全：
 - 事件包括 PRESS、CLICK、DOUBLE、LONG。应用菜单主要消费 CLICK；页面中的 OK LONG 被全局拦截用于返回。
 
 重标阈值时，在 Button 页逐个长按按键记录稳定电压，采集多块板、不同电量和合理温度范围的数据，再把相邻分布之间留裕量设置为边界。不要只用理论分压值。
+
+BSP 提供 PRESS、RELEASE、CLICK、DOUBLE、LONG 事件。RELEASE 在松开时立即
+发出，不等待单击分类。组合短按和长按操作的应用必须在长按后抑制松开动作。
 
 ## 7. 共享 I2C
 
@@ -235,7 +238,7 @@ SOC 准确度取决于电芯与 profile 的匹配程度。本驱动给出的是�
 
 内存审查至少关注：
 
-- LVGL 静态内存池 24 KB；
+- LVGL 静态内存池 48 KB；
 - LCD DMA buffer 约 9.6 KB；
 - I2S DMA descriptor/frame buffer；
 - Audio demo 96 KB 录音堆；

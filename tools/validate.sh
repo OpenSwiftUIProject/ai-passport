@@ -33,6 +33,10 @@ run_static_checks() {
         tests/physical-input/test_dispatch.c main/physical_input.c \
         -o "${test_dir}/test_physical_input"
     "${test_dir}/test_physical_input"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
+        -Itests/openswiftui-lvgl/include -Itests/swift-interop/include -Icomponents/bsp/include \
+        tests/2048-input/test_input.c main/demo_2048.c -o "${test_dir}/test_2048_input"
+    "${test_dir}/test_2048_input"
     python3 tests/test_verify_firmware.py
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
         tests/test_screen_protocol.c main/screen_protocol.c \

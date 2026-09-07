@@ -38,3 +38,10 @@ void demo_swift_key(bsp_btn_t btn, bsp_btn_ev_t ev);
 
 void demo_openswiftui_enter(void); void demo_openswiftui_exit(void);
 void demo_openswiftui_key(bsp_btn_t btn, bsp_btn_ev_t ev);
+
+void demo_2048_enter(void); void demo_2048_exit(void);
+void demo_2048_key(bsp_btn_t btn, bsp_btn_ev_t ev);
+
+#ifdef PASSPORT_2048_SOAK
+void demo_2048_soak_start(void);
+#endif

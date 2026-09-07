@@ -2,7 +2,12 @@
 #define LV_CONF_H
 #define LV_COLOR_DEPTH 16
 #define LV_USE_OS LV_OS_NONE
-#define LV_USE_STDLIB_MALLOC LV_STDLIB_CLIB
+#define LV_ASSERT_HANDLER_INCLUDE <stdlib.h>
+#define LV_USE_STDLIB_MALLOC LV_STDLIB_BUILTIN
+// Exercise the firmware's bounded pool (64-bit host objects are larger).
+#define LV_MEM_SIZE (48 * 1024)
+#define LV_USE_ASSERT_MALLOC 1
+#define LV_ASSERT_HANDLER abort();
 #define LV_USE_STDLIB_STRING LV_STDLIB_CLIB
 #define LV_USE_STDLIB_SPRINTF LV_STDLIB_CLIB
 #define LV_FONT_MONTSERRAT_14 1

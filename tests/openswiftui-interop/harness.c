@@ -70,7 +70,7 @@ void passport_scene_end(bool succeeded) { s_ended = true; s_success = succeeded;
 
 int main(void)
 {
-    assert(openswiftui_embedded_version() == 3);
+    assert(openswiftui_embedded_version() == 4);
     passport_swift_prepare();
     for (unsigned failure = 0; failure <= 8; ++failure) {
         s_calls = 0; s_ended = false; s_success = false; s_fail_at = failure;

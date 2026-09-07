@@ -30,6 +30,7 @@ static const demo_entry_t DEMOS[] = {
     { "BLE",     demo_ble_enter,     demo_ble_exit,     demo_ble_key     },
     { "Low Power", demo_low_power_enter, demo_low_power_exit, demo_low_power_key },
     { "OpenSwiftUI", demo_openswiftui_enter, demo_openswiftui_exit, demo_openswiftui_key },
+    { "2048", demo_2048_enter, demo_2048_exit, demo_2048_key },
 };
 #define DEMO_COUNT (sizeof(DEMOS) / sizeof(DEMOS[0]))
 
@@ -67,7 +68,8 @@ static void menu_build(void) {
         lv_obj_center(s_rows[i]);
     }
 
-    s_mascot = ui_pixel_mascot_create(s_menu_scr, 101, 242);
+    // Nine entries leave the lower-right slot free for the mascot.
+    s_mascot = ui_pixel_mascot_create(s_menu_scr, 157, 237);
 
     menu_refresh();
     lv_screen_load(s_menu_scr);
@@ -105,6 +107,17 @@ static void dispatch_key(bsp_btn_t btn, bsp_btn_ev_t ev) {
     }
 }
 
+#ifdef PASSPORT_2048_SOAK
+static void start_soak_page(lv_timer_t *timer)
+{
+    lv_timer_delete(timer);
+    s_active = 8;
+    DEMOS[s_active].enter();
+    physical_input_start();
+    demo_2048_soak_start();
+}
+#endif
+
 void app_main(void) {
     ESP_LOGI(TAG, "FoloToy AI Passport BSP demo 启动");
     esp_sleep_wakeup_cause_t wakeup = esp_sleep_get_wakeup_cause();
@@ -132,7 +145,12 @@ void app_main(void) {
         input_ready = physical_input_init(dispatch_key);
         bsp_lvgl_unlock();
     }
+#ifdef PASSPORT_2048_SOAK
+    // The diagnostic supplies events through the same queue and dispatcher.
+    s_ok[1] = input_ready;
+#else
     s_ok[1] = input_ready && (bsp_button_init(physical_input_enqueue, NULL) == ESP_OK);
+#endif
     if (!s_ok[1]) ESP_LOGE(TAG, "Input dispatcher or button driver unavailable");
     s_ok[2] = (bsp_audio_init() == ESP_OK);
     s_ok[3] = (bsp_battery_init() == ESP_OK);
@@ -140,6 +158,7 @@ void app_main(void) {
     s_ok[5] = true;
     s_ok[6] = true;
     s_ok[7] = true;
+    s_ok[8] = s_ok[1];                                 // The game requires physical input.
 
     // Swift samples optional battery data once, before entering LVGL context.
     passport_swift_prepare();
@@ -147,9 +166,14 @@ void app_main(void) {
     if (bsp_lvgl_lock(1000)) {
         // Start directly in ContentView, retaining long-OK navigation.
         // The existing long-OK route can still return to the hardware menu.
+#ifdef PASSPORT_2048_SOAK
+        // Match physical menu entry: execute on the LVGL task, not app_main.
+        lv_timer_create(start_soak_page, 1, NULL);
+#else
         s_active = 7;
         DEMOS[s_active].enter();
         physical_input_start();
+#endif
         bsp_lvgl_unlock();
     }
 

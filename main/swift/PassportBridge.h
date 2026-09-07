@@ -30,12 +30,25 @@ uint32_t openswiftui_embedded_version(void);
 void passport_content_enter(void);
 void passport_content_exit(void);
 void passport_content_action(int32_t action);
+void passport_2048_enter(uint32_t seed);
+void passport_2048_exit(void);
+void passport_2048_action(int32_t action);
+void passport_2048_tick(uint32_t elapsed_ms);
+// Page-owned LVGL clock; stopped before releasing Swift state or scene objects.
+bool passport_scene_start_clock(void (*callback)(uint32_t));
+void passport_scene_stop_clock(void);
+void passport_scene_clock_begin(void);
+void passport_scene_clock_phase(void);
+void passport_scene_clock_report(void);
+void passport_scene_input_overflow(void);
 typedef struct {
     int32_t screen_width, screen_height;
     int32_t top, leading, bottom, trailing;
 } passport_scene_geometry_t;
 bool passport_scene_begin(int32_t boot_battery_percent);
-// Replaces content children while preserving the page shell and battery label.
+bool passport_scene_begin_2048(int32_t boot_battery_percent);
+void passport_scene_destroy(void);
+// Begins a frame, reusing compatible drawing objects in command order.
 bool passport_scene_reset(void);
 bool passport_scene_get_geometry(passport_scene_geometry_t *geometry);
 bool passport_scene_measure_image(const uint8_t *name, uint32_t length, int32_t *width, int32_t *height);

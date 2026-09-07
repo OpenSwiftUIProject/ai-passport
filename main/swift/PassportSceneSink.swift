@@ -41,3 +41,22 @@ struct PassportSceneSink: EmbeddedRenderSink {
         }
     }
 }
+
+// Both pages use the same measured root and C sink, with page-specific insets.
+func renderPassportScene<Content: View>(_ host: EmbeddedViewHost<Content>) {
+    var configuration = passport_scene_geometry_t()
+    guard passport_scene_get_geometry(&configuration), passport_scene_reset() else {
+        passport_scene_end(false)
+        host.invalidate()
+        return
+    }
+    let geometry = RootGeometry(
+        screenSize: EmbeddedSize(width: configuration.screen_width, height: configuration.screen_height),
+        safeAreaInsets: EdgeInsets(top: configuration.top, leading: configuration.leading,
+                                  bottom: configuration.bottom, trailing: configuration.trailing)
+    )
+    var sink = PassportSceneSink(originX: geometry.contentBounds.x, originY: geometry.contentBounds.y)
+    host.render(rootGeometry: geometry, to: &sink)
+    passport_scene_end(sink.succeeded)
+    if !sink.succeeded { host.invalidate() }
+}
