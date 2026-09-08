@@ -5,7 +5,7 @@ mode="${1:---all}"
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 
 usage() {
-    echo "Usage: $0 [--all|--static|--firmware]" >&2
+    echo "Usage: $0 [--all|--static|--firmware|--release-2048]" >&2
 }
 
 run_static_checks() {
@@ -51,6 +51,7 @@ run_static_checks() {
 
 run_firmware_checks() (
     local validation_build_dir
+    local boot_2048="${1:-OFF}"
 
     if ! command -v idf.py >/dev/null 2>&1; then
         echo "ERROR: idf.py is not available; activate ESP-IDF 5.5.3 first." >&2
@@ -62,10 +63,14 @@ run_firmware_checks() (
 
     SDKCONFIG_DEFAULTS="${repo_root}/sdkconfig.defaults" \
         idf.py -B "${validation_build_dir}" \
-        -D "SDKCONFIG=${validation_build_dir}/sdkconfig" build
+        -D "SDKCONFIG=${validation_build_dir}/sdkconfig" \
+        -D "PASSPORT_BOOT_2048=${boot_2048}" -D PASSPORT_2048_SOAK=OFF build
     idf.py -B "${validation_build_dir}" merge-bin \
         -o "${validation_build_dir}/FoloToy-AI-Passport-full.bin"
     python3 tools/verify_firmware.py "${validation_build_dir}"
+    if [[ "${boot_2048}" == ON ]]; then
+        python3 tools/package_2048.py "${validation_build_dir}"
+    fi
     mkdir -p "${repo_root}/build"
     install -m 0644 \
         "${validation_build_dir}/FoloToy-AI-Passport-full.bin" \
@@ -84,6 +89,10 @@ case "${mode}" in
         ;;
     --firmware)
         run_firmware_checks
+        ;;
+    --release-2048)
+        run_static_checks
+        run_firmware_checks ON
         ;;
     *)
         usage

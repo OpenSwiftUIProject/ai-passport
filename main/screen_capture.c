@@ -68,6 +68,42 @@ static void capture(uint32_t id)
              (unsigned)uxTaskGetStackHighWaterMark(NULL));
 }
 
+typedef struct {
+    uint16_t next_y;
+    int64_t deadline_us;
+} fap_transfer_t;
+
+static esp_err_t send_fap_row(uint16_t x, uint16_t y, uint16_t width,
+                             const uint8_t *pixels, void *context)
+{
+    fap_transfer_t *transfer = context;
+    if (!screen_fap_advance(&transfer->next_y, BSP_LCD_W, BSP_LCD_H, x, y, width)) {
+        return ESP_ERR_INVALID_STATE;
+    }
+    return send_packet((const char *)pixels, (size_t)width * 2, transfer->deadline_us);
+}
+
+static void capture_fap(void)
+{
+    // Take LVGL before stdout (the BSP lock and FILE lock are recursive).
+    // Keep ordinary console logs out of the binary header/payload. The render
+    // and row callbacks must not print while this transfer owns stdout.
+    if (!bsp_lvgl_lock(1000)) return;
+    flockfile(stdout);
+    fflush(stdout);
+    fap_transfer_t transfer = { .deadline_us = esp_timer_get_time() + 8000000 };
+    char header[80];
+    size_t length = screen_fap_header(header, sizeof(header), BSP_LCD_W, BSP_LCD_H);
+    esp_err_t result = send_packet("\n", 1, transfer.deadline_us);
+    if (result == ESP_OK) result = send_packet(header, length, transfer.deadline_us);
+    if (result == ESP_OK) result = bsp_display_capture(send_fap_row, &transfer);
+    funlockfile(stdout);
+    bsp_lvgl_unlock();
+    // Do not append diagnostic bytes to an incomplete binary payload.
+    // A later request is still accepted; no reset or persistent state change.
+    (void)result;
+}
+
 static void command_task(void *argument)
 {
     (void)argument;
@@ -82,6 +118,7 @@ static void command_task(void *argument)
             line[used] = '\0';
             uint32_t id;
             if (!overflow && screen_request_id(line, &id)) capture(id);
+            else if (!overflow && screen_fap_request(line)) capture_fap();
             used = 0;
             overflow = false;
         } else if ((unsigned char)byte < 32 || (unsigned char)byte > 126) {
@@ -105,15 +142,16 @@ esp_err_t screen_capture_start(void)
     }
     // Console and the capture service must share the interrupt-backed driver.
     usb_serial_jtag_vfs_use_driver();
-    // lv_refr_now draws on this stack: match the port's 7168-byte rendering
-    // budget plus 2 KiB for capture records and USB/protocol calls.
-    if (xTaskCreate(command_task, "screen_usb", 9216, NULL, 3, &s_task) != pdPASS) {
+    // lv_refr_now draws on this stack: use the measured LVGL rendering budget
+    // plus 2 KiB for capture records and USB/protocol calls.
+    if (xTaskCreate(command_task, "screen_usb", CONFIG_BSP_LVGL_TASK_STACK_SIZE + 2048,
+                    NULL, 3, &s_task) != pdPASS) {
         if (installed_here) {
             usb_serial_jtag_vfs_use_nonblocking();
             usb_serial_jtag_driver_uninstall();
         }
         return ESP_ERR_NO_MEM;
     }
-    ESP_LOGI(TAG, "USB screenshot service ready (FPS1)");
+    ESP_LOGI(TAG, "USB screenshot service ready (FPS1 / FAP_SCREENSHOT_V1)");
     return ESP_OK;
 }

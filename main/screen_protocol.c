@@ -3,6 +3,29 @@
 #include <stdio.h>
 #include <string.h>
 
+bool screen_fap_request(const char *line)
+{
+    return line && strcmp(line, "FAP_SCREENSHOT_V1") == 0;
+}
+
+size_t screen_fap_header(char *output, size_t capacity, uint16_t width, uint16_t height)
+{
+    if (!output || !capacity || !width || !height || width > 4096 || height > 4096 ||
+        (uint32_t)width * height * 2 > 10 * 1024 * 1024) return 0;
+    int length = snprintf(output, capacity, "FAP_SCREENSHOT_V1 %u %u RGB565LE %" PRIu32 "\n",
+                          width, height, (uint32_t)width * height * 2);
+    return length > 0 && (size_t)length < capacity ? (size_t)length : 0;
+}
+
+bool screen_fap_advance(uint16_t *next_y, uint16_t frame_width, uint16_t frame_height,
+                        uint16_t x, uint16_t y, uint16_t width)
+{
+    if (!next_y || !frame_width || x || width != frame_width ||
+        y != *next_y || y >= frame_height) return false;
+    ++*next_y;
+    return true;
+}
+
 bool screen_request_id(const char *line, uint32_t *id)
 {
     const char prefix[] = "FPS1 CAPTURE ";

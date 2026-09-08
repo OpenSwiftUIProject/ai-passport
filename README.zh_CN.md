@@ -44,6 +44,9 @@ AttributeGraph/RenderBox 渲染器，也不是完整兼容 SwiftUI 的运行时�
 
 ## OpenSwiftUI 2048
 
+分享用的发行版开机直接进入 2048。打包、安装和官方发布截图流程见[发行说明](docs/development/release/pocket-2048.zh_CN.md)。
+
+
 长按 OK 离开开机展示页，再在硬件菜单中选择 **2048**。原来的 OpenSwiftUI
 展示 Demo 仍然保留。
 

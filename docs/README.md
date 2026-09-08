@@ -133,3 +133,5 @@ GitHub community documents: [CONTRIBUTING.md](../.github/CONTRIBUTING.md), [CODE
 GitHub community documents: [CONTRIBUTING.md](../.github/CONTRIBUTING.md), [CODE_OF_CONDUCT.md](../.github/CODE_OF_CONDUCT.md), [SECURITY.md](../.github/SECURITY.md), and [SUPPORT.md](../.github/SUPPORT.md).
 
 > This README describes the product and repository. AI agents must begin with `AGENTS.md` and follow its task-specific routing.
+
+- [Pocket 2048 release](development/release/pocket-2048.md): build, share and capture the playable release.

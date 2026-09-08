@@ -8,6 +8,8 @@
 
 static uint8_t s_buffer[240 * 20 * 2];
 static FILE *s_wire;
+static FILE *s_fap;
+static uint16_t s_fap_next_y;
 static unsigned s_pixels;
 static unsigned s_flushed_pixels;
 int bsp_battery_soc(void) { return 73; } // Explicit host fixture, not board data.
@@ -84,6 +86,8 @@ static void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
     unsigned width = lv_area_get_width(area), height = lv_area_get_height(area);
     char packet[800];
     for (unsigned row = 0; row < height; ++row) {
+        assert(screen_fap_advance(&s_fap_next_y, 240, 320, area->x1, area->y1 + row, width));
+        assert(fwrite(pixels + row * buffer->header.stride, 2, width, s_fap) == width);
         size_t size = screen_encode_row(packet, sizeof(packet), 0x12345678,
                                         area->x1, area->y1 + row, width,
                                         pixels + row * buffer->header.stride);
@@ -97,11 +101,22 @@ static void capture(lv_display_t *display, const char *path)
 {
     s_wire = fopen(path, "wb");
     assert(s_wire);
+    char fap_path[1024], header[80];
+    int path_length = snprintf(fap_path, sizeof(fap_path), "%s.fap", path);
+    assert(path_length > 0 && (size_t)path_length < sizeof(fap_path));
+    s_fap = fopen(fap_path, "wb");
+    assert(s_fap);
+    size_t header_length = screen_fap_header(header, sizeof(header), 240, 320);
+    assert(header_length && fwrite(header, 1, header_length, s_fap) == header_length);
+    s_fap_next_y = 0;
     fputs("FPS1 BEGIN 12345678 240 320 RGB565LE\n", s_wire);
     s_pixels = 0;
     lv_obj_invalidate(lv_screen_active());
     lv_refr_now(display);
     assert(s_pixels == 76800);
+    assert(s_fap_next_y == 320);
+    assert(fclose(s_fap) == 0);
+    s_fap = NULL;
     fprintf(s_wire, "FPS1 END 12345678 %u\n", s_pixels);
     assert(fclose(s_wire) == 0);
     s_wire = NULL;

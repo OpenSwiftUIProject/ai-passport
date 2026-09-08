@@ -107,14 +107,16 @@ static void dispatch_key(bsp_btn_t btn, bsp_btn_ev_t ev) {
     }
 }
 
-#ifdef PASSPORT_2048_SOAK
-static void start_soak_page(lv_timer_t *timer)
+#if defined(PASSPORT_2048_SOAK) || defined(PASSPORT_BOOT_2048)
+static void start_2048_page(lv_timer_t *timer)
 {
     lv_timer_delete(timer);
     s_active = 8;
     DEMOS[s_active].enter();
     physical_input_start();
+#ifdef PASSPORT_2048_SOAK
     demo_2048_soak_start();
+#endif
 }
 #endif
 
@@ -164,11 +166,10 @@ void app_main(void) {
     passport_swift_prepare();
 
     if (bsp_lvgl_lock(1000)) {
-        // Start directly in ContentView, retaining long-OK navigation.
-        // The existing long-OK route can still return to the hardware menu.
-#ifdef PASSPORT_2048_SOAK
+        // Both startup variants retain long-OK navigation to the menu.
+#if defined(PASSPORT_2048_SOAK) || defined(PASSPORT_BOOT_2048)
         // Match physical menu entry: execute on the LVGL task, not app_main.
-        lv_timer_create(start_soak_page, 1, NULL);
+        lv_timer_create(start_2048_page, 1, NULL);
 #else
         s_active = 7;
         DEMOS[s_active].enter();

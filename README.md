@@ -47,6 +47,9 @@ tests. The FoloToy sky/grass/header and boot battery snapshot surround the scene
 
 ## OpenSwiftUI 2048
 
+The sharing build starts directly in 2048. See the [release guide](docs/development/release/pocket-2048.md) for bundles, installation and official publisher capture.
+
+
 Long-press OK to leave the opening display demo, then select **2048** in the
 hardware menu. The original OpenSwiftUI demo remains available.
 

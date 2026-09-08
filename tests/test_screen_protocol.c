@@ -5,6 +5,24 @@
 
 int main(void)
 {
+    assert(screen_fap_request("FAP_SCREENSHOT_V1"));
+    assert(!screen_fap_request(NULL));
+    assert(!screen_fap_request("FAP_SCREENSHOT_V1 extra"));
+    assert(!screen_fap_request("FAP_SCREENSHOT_V10"));
+    char header[80];
+    assert(screen_fap_header(header, sizeof(header), 240, 320) == strlen(header));
+    assert(strcmp(header, "FAP_SCREENSHOT_V1 240 320 RGB565LE 153600\n") == 0);
+    assert(!screen_fap_header(header, 8, 240, 320));
+    assert(!screen_fap_header(header, sizeof(header), 0, 320));
+    assert(!screen_fap_header(header, sizeof(header), 4096, 4096));
+    uint16_t next_y = 0;
+    assert(!screen_fap_advance(&next_y, 240, 320, 1, 0, 239));
+    assert(!screen_fap_advance(&next_y, 240, 320, 0, 1, 240));
+    for (uint16_t y = 0; y < 320; ++y) {
+        assert(screen_fap_advance(&next_y, 240, 320, 0, y, 240));
+        assert(!screen_fap_advance(&next_y, 240, 320, 0, y, 240));
+    }
+    assert(!screen_fap_advance(&next_y, 240, 320, 0, 320, 240));
     uint32_t id = 7;
     assert(screen_request_id("FPS1 CAPTURE 0123ABcd", &id) && id == 0x0123abcd);
     const char *invalid[] = { "", "FPS1 CAPTURE -1234567", "FPS1 CAPTURE 0123456",

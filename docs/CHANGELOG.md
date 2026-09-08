@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- Added a playable 2048 release build, checked sharing bundles and the official FAP_SCREENSHOT_V1 serial capture protocol.
+
 - Fixed 2048 stack-protection resets with a measured LVGL task stack budget; excluded layout/idle time from animation phase clocks, suppressed unchanged LVGL updates and normal per-move USB logs, and made slide/reveal stages more visible.
 - Added layout-driven OpenSwiftUI 2048 slide/merge/spawn animations, identified tiles, reusable LVGL objects, an elapsed-time page clock and a bounded input FIFO; expanded host checks to animation frames and mid-animation exit.
 

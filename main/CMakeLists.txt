@@ -1,4 +1,5 @@
 option(PASSPORT_2048_SOAK "Run a bounded on-device 2048 stress diagnostic" OFF)
+option(PASSPORT_BOOT_2048 "Start the playable 2048 release on the LVGL task" OFF)
 
 idf_component_register(
     SRCS "main.c"
@@ -25,6 +26,9 @@ idf_component_register(
 )
 
 set(passport_diagnostic_swift)
+if(PASSPORT_BOOT_2048)
+    target_compile_definitions(${COMPONENT_LIB} PRIVATE PASSPORT_BOOT_2048=1)
+endif()
 if(PASSPORT_2048_SOAK)
     target_compile_definitions(${COMPONENT_LIB} PRIVATE PASSPORT_2048_SOAK=1)
     list(APPEND passport_diagnostic_swift "swift/Game2048/Game2048Soak.swift")
