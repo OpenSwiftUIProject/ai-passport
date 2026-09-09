@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- Added the OpenSwiftUI browser Playground, Swift highlighting, a standalone local compiler setup skill and ai-passport Pages workflow; build matching full firmware, download it or hand it to Simulator.
+
 - Added a playable 2048 release build, checked sharing bundles and the official FAP_SCREENSHOT_V1 serial capture protocol.
 
 - Fixed 2048 stack-protection resets with a measured LVGL task stack budget; excluded layout/idle time from animation phase clocks, suppressed unchanged LVGL updates and normal per-move USB logs, and made slide/reveal stages more visible.

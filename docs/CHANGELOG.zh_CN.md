@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- 新增 OpenSwiftUI 浏览器 Playground、Swift 高亮、独立本地编译器 setup skill 与 ai-passport Pages 工作流；支持匹配预览源码的完整固件构建、下载及 Simulator 导入。
+
 - 新增开机直接进入 2048 的发行构建、带校验的分享包及官方 FAP_SCREENSHOT_V1 串口截图协议。
 
 - 修复 2048 栈保护重启，按实机测量配置 LVGL 任务栈；动画阶段计时排除布局与空闲耗时，避免未变 LVGL 样式重绘及正常游戏逐次 USB 日志阻塞，并增强滑动与展示效果。

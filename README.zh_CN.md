@@ -42,6 +42,12 @@ AttributeGraph/RenderBox 渲染器，也不是完整兼容 SwiftUI 的运行时�
 重新进入 `OpenSwiftUI` 会创建初始状态。原计数模型及适配层保留作回归测试。
 场景周围保留 FoloToy 天空、草地、标题及启动电量快照。
 
+## OpenSwiftUI Playground
+
+浏览器中编辑 ContentView，实时 WASM 预览，成功后构建完整固件并下载或发送到 Simulator。
+从零安装、本地编译器和 Pages 说明见 [Playground](tools/playground/README.zh_CN.md)，
+独立 AI 安装流程见 [setup skill](skills/ai-passport-local-compiler/SKILL.zh_CN.md)。
+
 ## OpenSwiftUI 2048
 
 分享用的发行版开机直接进入 2048。打包、安装和官方发布截图流程见[发行说明](docs/development/release/pocket-2048.zh_CN.md)。

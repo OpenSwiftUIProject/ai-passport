@@ -135,3 +135,10 @@ GitHub community documents: [CONTRIBUTING.md](../.github/CONTRIBUTING.md), [CODE
 > This README describes the product and repository. AI agents must begin with `AGENTS.md` and follow its task-specific routing.
 
 - [Pocket 2048 release](development/release/pocket-2048.md): build, share and capture the playable release.
+
+## Browser development tools
+
+- [Playground](../tools/playground/README.md)
+- [Local compiler](../tools/playground/LOCAL_COMPILER.md)
+- [GitHub Pages](../tools/playground/DEPLOYMENT.md)
+- [Standalone setup skill](../skills/ai-passport-local-compiler/SKILL.md)

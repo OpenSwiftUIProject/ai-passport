@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Passport Local Compiler"
+  short_description: "Set up Swift and connect the Passport playground"
+  default_prompt: "Use $ai-passport-local-compiler to clone the AI Passport fork on main, prepare my local Swift compiler, and connect the web playground."

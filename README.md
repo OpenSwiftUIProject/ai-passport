@@ -45,6 +45,13 @@ layout and scene replacement. Long OK returns to the hardware menu; reopening
 `OpenSwiftUI` creates fresh state. The original counter model/adapter remain as regression
 tests. The FoloToy sky/grass/header and boot battery snapshot surround the scene.
 
+## OpenSwiftUI Playground
+
+Edit ContentView in the browser, preview it as WASM, then build full firmware to
+download or send to Simulator. See [Playground](tools/playground/README.md) for
+standalone setup and Pages hosting, or use the independent
+[setup skill](skills/ai-passport-local-compiler/SKILL.md).
+
 ## OpenSwiftUI 2048
 
 The sharing build starts directly in 2048. See the [release guide](docs/development/release/pocket-2048.md) for bundles, installation and official publisher capture.

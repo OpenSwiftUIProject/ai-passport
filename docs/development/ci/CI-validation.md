@@ -4,7 +4,7 @@
 
 # Pull Request Validation
 
-Two workflows validate pull requests: `.github/workflows/static-checks.yml` and
+The firmware and host workflows validate pull requests: `.github/workflows/static-checks.yml` and
 `.github/workflows/firmware-checks.yml`. Both run for pull requests, pushes to
 `main`, and manual dispatch; local development and CI share `tools/validate.sh`.
 
@@ -52,3 +52,12 @@ source <path-to-esp-idf-v5.5.3>/export.sh
 Follow the [environment bootstrap](../engineering/environment-setup.md) if ESP-IDF 5.5.3 is
 not installed. Reproduce a CI failure with the same mode locally. Do not
 maintain duplicate validation commands inside the workflow.
+
+## Playground Pages
+
+`playground-pages.yml` builds the OpenSwiftUI browser preview, validates the local
+compiler API and WASM artifact, and packages the standalone setup skill. Matching
+PRs validate without deploying; main pushes in `OpenSwiftUIProject/ai-passport`
+deploy through GitHub Pages. See [Playground deployment](../../../tools/playground/DEPLOYMENT.md).
+The fork disables the Upstream Sync workflow because its main branch contains
+maintained OpenSwiftUI changes; upstream updates are reviewed manually.

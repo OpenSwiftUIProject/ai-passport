@@ -1,0 +1,77 @@
+name: Playground Pages
+
+on:
+  pull_request:
+    paths:
+      - 'tools/playground/**'
+      - 'skills/ai-passport-local-compiler/**'
+      - 'main/**'
+      - 'tests/openswiftui-lvgl/**'
+      - 'tests/swift-interop/**'
+      - '.github/workflows/playground-pages.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/playground/**'
+      - 'skills/ai-passport-local-compiler/**'
+      - 'main/**'
+      - 'tests/openswiftui-lvgl/**'
+      - 'tests/swift-interop/**'
+      - '.github/workflows/playground-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playground-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@94196ee1d15439c1b6651cd87ef14e88ec435966
+        with:
+          node-version: '22'
+      - uses: swift-actions/setup-swift@7e293214cba9e9225c93ce3267f17f6efdb656a8
+        with:
+          swift-version: '6.3.1'
+      - name: Install build tools
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: |
+          for tool in cmake ninja; do
+            command -v "$tool" >/dev/null || brew install "$tool"
+          done
+      - name: Build standalone Pages artifact and setup skill
+        run: ./tools/playground/start-compiler.sh --export-pages build/pages/ai-passport
+      - name: Validate API and WASM
+        working-directory: tools/playground
+        run: |
+          python3 -m unittest discover -p 'test_*.py'
+          node --test compiler-config.test.mjs
+          node smoke.mjs
+          node verify-static.mjs ../../build/pages/ai-passport
+      - uses: actions/upload-pages-artifact@98ef48e41587a300b82de4cf298aa98b57b2faae
+        with:
+          path: build/pages/ai-passport
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'OpenSwiftUIProject/ai-passport'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
+      - name: Deploy the ai-passport playground
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346

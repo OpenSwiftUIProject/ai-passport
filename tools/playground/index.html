@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSwiftUI · Passport Playground</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header>
+    <div><h1>OpenSwiftUI Playground</h1><p>Write a view. See it on your Passport.</p></div>
+    <a href="https://github.com/OpenSwiftUIProject/ai-passport" target="_blank" rel="noopener">OpenSwiftUIProject/ai-passport ↗</a>
+  </header>
+  <main>
+    <section aria-label="Swift editor">
+      <form id="compiler-form" class="compiler-connection">
+        <label for="compiler-url">Compiler URL</label>
+        <div class="compiler-controls">
+          <input id="compiler-url" type="url" value="http://127.0.0.1:4191/compile" required spellcheck="false" aria-describedby="connection-status">
+          <button id="connect" type="submit">Connect</button>
+          <button id="disconnect" type="button" disabled>Disconnect</button>
+        </div>
+        <p id="connection-status" role="status">Connect your local compiler to edit Swift.</p>
+        <details><summary>Start a compiler on your computer</summary>
+          Start from a terminal with Swift 6.3.1 and the build tools installed:
+          <pre id="start-command"></pre>
+          Or give this standalone skill to your AI assistant:
+          <pre id="skill-prompt"></pre>
+          <a href="./skills/ai-passport-local-compiler.zip" download>Download setup skill</a><br>
+          Keep the terminal open, then click Connect. Allow local network access if your browser asks.
+          <a href="./LOCAL_COMPILER.md" target="_blank" rel="noopener">Setup instructions</a>
+          · <a href="./LOCAL_COMPILER.zh_CN.md" target="_blank" rel="noopener">中文说明</a>
+        </details>
+      </form>
+      <div class="toolbar">
+        <button class="primary" id="run" disabled>Build &amp; Run</button>
+        <label id="auto-label"><input id="auto" type="checkbox" checked> Auto preview</label>
+        <button id="reset">Reset example</button>
+        <span class="filename">ContentView.swift</span>
+      </div>
+      <p id="mode-note" class="mode-note" hidden></p>
+      <div id="source"></div>
+      <div role="status" id="status" class="status">Loading editor…</div>
+      <pre id="diagnostics" aria-live="polite"></pre>
+    </section>
+    <aside class="preview">
+      <h2>AI Passport · 240 × 320</h2>
+      <div class="device"><canvas id="screen" width="240" height="320" aria-label="OpenSwiftUI LVGL preview"></canvas></div>
+      <div class="buttons"><button data-button="0">UP</button><button data-button="1">DOWN</button><button data-button="2">OK</button></div>
+      <small>UP / DOWN change the palette.<br>OK toggles the image.</small>
+      <details>
+        <summary>About this preview</summary>
+        The same OpenSwiftUI Embedded sources, Passport scene, bitmap and LVGL font run here.
+        RootGeometry uses the demo’s screen insets. Each rebuild starts fresh state.
+        Battery is a fixed host fixture (73%). The compiled WebAssembly runs in your browser.
+      </details>
+      <section class="firmware-actions" aria-label="Firmware">
+        <h2>Take your view further</h2>
+        <button id="build-firmware" disabled>Build firmware</button>
+        <button id="download-firmware" disabled>Download full.bin</button>
+        <label for="simulator-url">Simulator URL</label>
+        <input id="simulator-url" type="url" value="http://127.0.0.1:4190/" spellcheck="false">
+        <button id="send-firmware" disabled>Send to Simulator</button>
+        <a id="open-simulator" target="_blank" rel="noopener" hidden>Open Simulator ↗</a>
+        <p id="firmware-status" role="status">Connect your compiler to build firmware.</p>
+        <details><summary>Firmware build log</summary><pre id="firmware-log"></pre></details>
+        <details><summary>Set up firmware &amp; Simulator</summary>
+          Firmware builds also require ESP-IDF 5.5.3. <a href="./LOCAL_COMPILER.md">Full setup instructions</a>.
+          Start a Simulator with Playground import support, allowing this website:
+          <pre id="simulator-command"></pre>
+        </details>
+      </section>
+    </aside>
+  </main>
+  <footer>OpenSwiftUI Embedded · Color, Text, Image("spark"), stacks, layout, @State and physical button closures.
+    <a id="licenses-link" href="./THIRD_PARTY_NOTICES.txt" hidden>Licenses</a>
+  </footer>
+</body>
+</html>

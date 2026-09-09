@@ -43,3 +43,10 @@ source <ESP-IDF-v5.5.3-路径>/export.sh
 
 未安装 ESP-IDF 5.5.3 时先按[环境引导](../engineering/environment-setup.zh_CN.md)搭建。CI
 失败应先在本地运行相同模式。不要在 workflow 中复制另一套构建或校验命令。
+
+## Playground Pages
+
+`playground-pages.yml` 构建 OpenSwiftUI 网页预览，验证本地编译器 API 和 WASM 产物，
+并打包独立 setup skill。相关 PR 只验证；`OpenSwiftUIProject/ai-passport` 的 main push
+通过 GitHub Pages 部署，见 [Playground 部署](../../../tools/playground/DEPLOYMENT.zh_CN.md)。
+fork 的 main 包含持续维护的 OpenSwiftUI 改动，因此禁用 Upstream Sync 工作流，手动审查上游更新。

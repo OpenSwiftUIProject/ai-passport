@@ -1,0 +1,6 @@
+{
+  "mode": "local",
+  "compileEndpoint": "./compile",
+  "precompiled": null,
+  "simulatorUrl": null
+}

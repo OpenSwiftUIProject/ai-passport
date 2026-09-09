@@ -131,3 +131,10 @@ GitHub 社区治理文档：[CONTRIBUTING.zh_CN.md](../.github/CONTRIBUTING.zh_C
 > 注：本 README 只描述产品与仓库，不含给 AI 的执行说明；AI 开始开发前请先读根目录 `AGENTS.zh_CN.md`，再按任务路由读取相关文档。
 
 - [口袋 2048 发行版](development/release/pocket-2048.zh_CN.md)：构建、分享和发布截图。
+
+## 浏览器开发工具
+
+- [Playground](../tools/playground/README.zh_CN.md)
+- [Local compiler](../tools/playground/LOCAL_COMPILER.zh_CN.md)
+- [GitHub Pages](../tools/playground/DEPLOYMENT.zh_CN.md)
+- [Standalone setup skill](../skills/ai-passport-local-compiler/SKILL.zh_CN.md)

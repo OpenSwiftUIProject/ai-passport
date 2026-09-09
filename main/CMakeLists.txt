@@ -1,5 +1,7 @@
 option(PASSPORT_2048_SOAK "Run a bounded on-device 2048 stress diagnostic" OFF)
 option(PASSPORT_BOOT_2048 "Start the playable 2048 release on the LVGL task" OFF)
+set(PASSPORT_CONTENT_VIEW_SOURCE "${CMAKE_CURRENT_LIST_DIR}/swift/ContentView.swift"
+    CACHE FILEPATH "ContentView source used by the firmware and local Playground")
 
 idf_component_register(
     SRCS "main.c"
@@ -37,7 +39,7 @@ endif()
 idf_component_register_swift(${COMPONENT_LIB}
     BRIDGING_HEADER "${CMAKE_CURRENT_LIST_DIR}/swift/PassportBridge.h"
     SRCS ${passport_diagnostic_swift} "swift/PassportCore/PassportState.swift" "swift/PassportDemo.swift"
-         "swift/ContentView.swift" "swift/PassportSceneSink.swift" "swift/PassportContent.swift"
+         "${PASSPORT_CONTENT_VIEW_SOURCE}" "swift/PassportSceneSink.swift" "swift/PassportContent.swift"
          "swift/PassportCore/Game2048.swift"
          "swift/Game2048/Game2048View.swift" "swift/Game2048/Game2048BoardView.swift"
          "swift/Game2048/Game2048RowView.swift" "swift/Game2048/Game2048TileView.swift"
