@@ -1,0 +1,53 @@
+name: Set up Embedded Swift
+description: Install the pinned Swift and OpenSwiftUI inputs, optionally with ESP-IDF.
+inputs:
+  firmware:
+    description: Install ESP-IDF and its ESP32-C3 tools as well.
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - uses: swift-actions/setup-swift@7e293214cba9e9225c93ce3267f17f6efdb656a8 # v3
+      with:
+        swift-version: '6.3.1'
+
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      with:
+        repository: OpenSwiftUIProject/OpenSwiftUI
+        ref: e35b91a31789c3c277e9a784b9f9b86e5eb708f5
+        path: build/ci/OpenSwiftUI
+        persist-credentials: false
+
+    - name: Select the Embedded toolchain and sources
+      shell: bash
+      run: |
+        swift_toolchain="$HOME/Library/Developer/Toolchains/swift-6.3.1-RELEASE.xctoolchain"
+        test -d "$swift_toolchain/usr/lib/swift/embedded/riscv32-none-none-eabi"
+        echo "SWIFT_TOOLCHAIN=$swift_toolchain" >> "$GITHUB_ENV"
+        echo "$swift_toolchain/usr/bin" >> "$GITHUB_PATH"
+        echo "OPENSWIFTUI_SOURCE_DIR=$GITHUB_WORKSPACE/build/ci/OpenSwiftUI" >> "$GITHUB_ENV"
+
+    - name: Install firmware build tools
+      if: inputs.firmware == 'true'
+      shell: bash
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: '1'
+      run: |
+        for formula in cmake ninja ccache python@3.12; do
+          brew list --versions "$formula" >/dev/null || brew install "$formula"
+        done
+        echo "$(brew --prefix python@3.12)/libexec/bin" >> "$GITHUB_PATH"
+
+    - name: Install ESP-IDF 5.5.3 for ESP32-C3
+      if: inputs.firmware == 'true'
+      shell: bash
+      run: |
+        export IDF_PATH="$RUNNER_TEMP/esp-idf-v5.5.3"
+        export IDF_TOOLS_PATH="$RUNNER_TEMP/espressif"
+        git clone --branch v5.5.3 --depth 1 --recursive --shallow-submodules \
+          https://github.com/espressif/esp-idf.git "$IDF_PATH"
+        "$IDF_PATH/install.sh" esp32c3
+        echo "IDF_PATH=$IDF_PATH" >> "$GITHUB_ENV"
+        echo "IDF_TOOLS_PATH=$IDF_TOOLS_PATH" >> "$GITHUB_ENV"
+        echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache" >> "$GITHUB_ENV"
+        echo "IDF_CCACHE_ENABLE=1" >> "$GITHUB_ENV"

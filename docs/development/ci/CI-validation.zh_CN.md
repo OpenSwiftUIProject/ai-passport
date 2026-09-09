@@ -17,6 +17,13 @@
   ESP32-C3 运行 `./tools/validate.sh --firmware`，验证编译、0x0 合并固件的偏移与内容，并保留 7 天
   Actions artifact。
 
+两个 job 均使用 macOS 15 与共用的 `.github/actions/setup-embedded` action，显式安装
+Swift 6.3.1 并获取 OpenSwiftUI revision
+`e35b91a31789c3c277e9a784b9f9b86e5eb708f5`。OpenSwiftUI 位于已忽略的 `build/ci/`，
+不需要相邻 workspace 或 OpenAttributeGraph。固件 job 还会安装 ESP-IDF 5.5.3、
+ESP32-C3 工具和 Python 3.12，再通过 `tools/with-env.sh` 激活环境。tag／手动触发的
+`build-firmware.yml` 使用同一套准备步骤；仅含 ESP-IDF 的 Docker 镜像没有所需 Swift 编译器。
+
 ## 路径过滤
 
 `firmware-checks.yml` 忽略不会影响固件构建的路径：`docs/**`、`plays/**`、`skills/**` 与 `*.md`。

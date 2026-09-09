@@ -15,30 +15,27 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-15
     outputs:
       artifact_name: ${{ steps.artifact_name.outputs.name }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
+      - uses: ./.github/actions/setup-embedded
+        with:
+          firmware: 'true'
+
       - name: Restore ccache
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: .ccache
-          key: ccache-${{ github.ref_type }}-${{ github.ref_name }}-${{ github.sha }}
+          key: ccache-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_type }}-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
-            ccache-${{ github.ref_type }}-${{ github.ref_name }}-
-            ccache-
+            ccache-${{ runner.os }}-${{ runner.arch }}-${{ github.ref_type }}-${{ github.ref_name }}-
+            ccache-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Build firmware (ESP-IDF 5.5.3 / esp32c3)
-        uses: espressif/esp-idf-ci-action@9d38657f3d789ca759b2b37aaf5ceffbc42c4f0d # v1
-        with:
-          esp_idf_version: v5.5.3
-          target: esp32c3
-          extra_docker_args: >-
-            -e CCACHE_DIR=/app/${{ github.repository }}/.ccache
-            -e IDF_CCACHE_ENABLE=1
-          command: ./tools/validate.sh --firmware
+        run: ./tools/with-env.sh ./tools/validate.sh --firmware
 
       - name: Set artifact name
         id: artifact_name

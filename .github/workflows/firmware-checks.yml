@@ -27,27 +27,24 @@ concurrency:
 jobs:
   firmware:
     name: ESP-IDF 5.5.3 firmware
-    runs-on: ubuntu-latest
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - uses: ./.github/actions/setup-embedded
+        with:
+          firmware: 'true'
 
       - name: Restore ccache
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: .ccache
-          key: ci-ccache-${{ github.sha }}
+          key: ci-ccache-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
           restore-keys: |
-            ci-ccache-
+            ci-ccache-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Build and verify merged firmware
-        uses: espressif/esp-idf-ci-action@9d38657f3d789ca759b2b37aaf5ceffbc42c4f0d # v1
-        with:
-          esp_idf_version: v5.5.3
-          target: esp32c3
-          extra_docker_args: >-
-            -e CCACHE_DIR=/app/${{ github.repository }}/.ccache
-            -e IDF_CCACHE_ENABLE=1
-          command: ./tools/validate.sh --firmware
+        run: ./tools/with-env.sh ./tools/validate.sh --firmware
 
       - name: Upload verified firmware
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

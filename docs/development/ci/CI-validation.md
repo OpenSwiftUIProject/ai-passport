@@ -19,6 +19,15 @@ The firmware and host workflows validate pull requests: `.github/workflows/stati
   build/configuration directory, verifies the build and the merged `0x0` image
   contents/offsets, and retains the artifact for seven days.
 
+Both jobs use macOS 15 and the shared `.github/actions/setup-embedded` action:
+Swift 6.3.1 and OpenSwiftUI revision
+`e35b91a31789c3c277e9a784b9f9b86e5eb708f5` are installed explicitly. The
+OpenSwiftUI checkout lives under ignored `build/ci/`, with no sibling workspace
+or OpenAttributeGraph checkout required. Firmware jobs additionally install
+ESP-IDF 5.5.3, its ESP32-C3 tools, and Python 3.12, then activate them through
+`tools/with-env.sh`. The tag/manual `build-firmware.yml` uses the same setup;
+an ESP-IDF-only Docker image does not include the required Swift compiler.
+
 ## Path filtering
 
 `firmware-checks.yml` ignores paths that cannot affect the firmware build:

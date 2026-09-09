@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- Fixed clean-runner host and firmware CI by installing Swift 6.3.1, pinned OpenSwiftUI sources and ESP-IDF explicitly; shared the setup with release builds.
+
 - Added the OpenSwiftUI browser Playground, Swift highlighting, a standalone local compiler setup skill and ai-passport Pages workflow; build matching full firmware, download it or hand it to Simulator.
 
 - Added a playable 2048 release build, checked sharing bundles and the official FAP_SCREENSHOT_V1 serial capture protocol.
