@@ -6,7 +6,7 @@
 
 ## Unreleased
 
-- Fixed clean-runner host and firmware CI by installing Swift 6.3.1, pinned OpenSwiftUI sources and ESP-IDF explicitly; shared the setup with release builds.
+- Fixed clean-runner host and firmware CI by installing Swift 6.3.1, pinned OpenSwiftUI sources and ESP-IDF explicitly; shared the setup with release builds and made actionlint checksum validation portable to macOS.
 
 - Added the OpenSwiftUI browser Playground, Swift highlighting, a standalone local compiler setup skill and ai-passport Pages workflow; build matching full firmware, download it or hand it to Simulator.
 

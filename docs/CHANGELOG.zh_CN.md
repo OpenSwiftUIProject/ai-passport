@@ -6,7 +6,7 @@
 
 ## Unreleased
 
-- 修复全新 runner 上的主机与固件 CI，显式安装 Swift 6.3.1、固定版本的 OpenSwiftUI 源码与 ESP-IDF，并与发行构建共用环境准备步骤。
+- 修复全新 runner 上的主机与固件 CI，显式安装 Swift 6.3.1、固定版本的 OpenSwiftUI 源码与 ESP-IDF，并与发行构建共用环境准备步骤；使 actionlint 校验和检查兼容 macOS。
 
 - 新增 OpenSwiftUI 浏览器 Playground、Swift 高亮、独立本地编译器 setup skill 与 ai-passport Pages 工作流；支持匹配预览源码的完整固件构建、下载及 Simulator 导入。
 
