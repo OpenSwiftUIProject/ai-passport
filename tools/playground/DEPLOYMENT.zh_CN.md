@@ -58,6 +58,11 @@ ContentView/WASM、本地编辑器依赖、许可、递归 SHA256SUMS 和 `.noje
 - `POST /firmware` 使用相同 JSON，返回任务 ID 和源码 SHA-256。
 - `GET /firmware/<id>` 返回 building/ready/failed 和有限长度的日志尾部。
 - `GET /firmware/<id>/download` 在 ready 时返回已检查完整固件。
+- 跨源静态 Simulator 的 `GET playground-config.json` 声明 `windowHandoff: true`。
+  Open 点击时创建窗口并清空 opener；`window-handoff.js` 检查随机 48 位十六进制 token、
+  精确 origin 与 WindowProxy，以 hello/ready/firmware/received 握手传递，校验完整镜像及
+  SHA-256。不向远端服务器上传二进制；编辑、重置或断开会取消未完成的交接。
+  本地预览使用与 Pages 一样的线上 Simulator URL。
 - 同源 Simulator 的 `GET playground-config.json` 声明协议 1 与 `indexeddb` 传输。
   两仓库各自提供兼容的 `browser-handoff.js`。数据库为 `openswiftui-passport-handoff-v1`，
   store 为 `firmware`，键为随机 48 位十六进制 `id`。记录包含 `version: 1`、ArrayBuffer

@@ -10,9 +10,8 @@ test('Simulator keeps its project path and discovers same-origin Pages', () => {
   assert.equal(simulatorURL('http://127.0.0.1:4190', page).href, 'http://127.0.0.1:4190/');
   assert.equal(simulatorTransport(simulatorURL('http://127.0.0.1:4190', page), page), 'http');
 });
-test('unrelated websites get a file-download fallback instead of a blind POST', () => {
-  assert.throws(() => simulatorTransport(new URL('https://folotoy-passport-simulator.onrender.com/'), page), /download full.bin/);
-  assert.throws(() => simulatorTransport(new URL(DEFAULT_SIMULATOR), 'http://127.0.0.1:4191/'), /same website/);
+test('local preview can hand off to the online Simulator through a browser window', () => {
+  assert.equal(simulatorTransport(new URL(DEFAULT_SIMULATOR), 'http://127.0.0.1:4191/'), 'window');
   for (const url of ['', 'http://example.org/', 'https://user:password@example.org', 'https://example.org/?x=1', 'javascript:alert(1)']) {
     assert.throws(() => simulatorURL(url, page));
   }

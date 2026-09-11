@@ -46,7 +46,7 @@ def main():
     subprocess.run(['node', str(ROOT / 'build-editor.mjs')], check=True)
     build.compile_view(ROOT / 'ContentView.swift', build.BUILD / 'static-example.wasm')
     output.mkdir(parents=True, exist_ok=True)
-    for name in ['index.html', 'styles.css', 'app.js', 'compiler-config.js', 'firmware.js', 'simulator-config.js', 'browser-handoff.js', 'worker.js', 'wasi.js',
+    for name in ['index.html', 'styles.css', 'app.js', 'compiler-config.js', 'firmware.js', 'simulator-config.js', 'browser-handoff.js', 'window-handoff.js', 'worker.js', 'wasi.js',
                  'ContentView.swift', 'LOCAL_COMPILER.md', 'LOCAL_COMPILER.zh_CN.md',
                  'DEPLOYMENT.md', 'DEPLOYMENT.zh_CN.md', 'README.md', 'README.zh_CN.md']:
         shutil.copy2(ROOT / name, output / name)

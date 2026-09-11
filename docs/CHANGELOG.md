@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- Local Playground previews can send firmware directly to the online Simulator across origins; no local Simulator URL is required.
 - Default Simulator handoff now opens the browser-only Simulator Pages site; fixed stale run links after edits, reset or disconnect.
 - Added Open Graph and X sharing metadata with a downloadable Playground cover; updated the documentation to record the verified public Pages and local compiler flow.
 

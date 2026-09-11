@@ -79,19 +79,22 @@ does not flash devices or provide an application-only download. Preserve device
 identity and Recovery when using a separate hardware installation workflow.
 
 The default [online Simulator](https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/)
-needs no local Simulator installation. From the
+needs no local Simulator installation. From a local preview or the
 [published Playground](https://openswiftuiproject.github.io/ai-passport/), click
-**Send to Simulator**, then **Open Simulator**. Both pages share an origin, so the
-checked firmware stays in this browser's IndexedDB; no firmware is uploaded.
-The link works in the same browser/profile for ten minutes. Up to three images
-are retained, with old entries pruned on subsequent sends. Expiry prevents loading;
-it does not promise immediate deletion of browser storage. This browser edition
-runs QEMU/WASM, display and buttons, but has no network bridge or community-link
-import. Downloaded full images can also be selected directly in Simulator.
+**Send to Simulator**, then **Open Simulator**. Keep the default online URL.
+For different origins, Open creates a new Simulator window and transfers the
+checked firmware with `postMessage`; it never uploads the binary to a server.
+Keep Playground open until delivery completes. If a popup is blocked, allow it
+and click Open again. To reload or reopen a transferred view, return to Playground
+and click Open again. A prepared transfer expires after ten minutes.
 
-If Playground and Simulator are on different origins (including different local
-ports), use **Download full.bin** and the Simulator file picker, or run the local
-Simulator with its import API. This optional version also provides networking:
+On the same origin, the pages can also use IndexedDB. That link works in the
+same browser/profile for ten minutes; up to three images are kept and old entries
+are pruned on subsequent sends. Expiry does not promise immediate deletion from
+browser storage. Links are for this browser session, not for sharing with others.
+Download full.bin to share or use the Simulator file picker as a fallback.
+The browser edition provides display and buttons, but no firmware networking or
+community-link import. For those optional features, start the local Node edition:
 
 ```sh
 git clone https://github.com/OpenSwiftUIProject/FoloToy-Passport-Simulator.git

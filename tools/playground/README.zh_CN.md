@@ -69,4 +69,4 @@ GitHub Pages 工作流和发布目录见[部署说明](DEPLOYMENT.zh_CN.md)。
 
 ## 固件与 Simulator
 
-成功预览后点击 Build firmware，下载匹配源码的 full.bin 或 Send to Simulator，再点 Open Simulator。固件需要额外安装 ESP-IDF 5.5.3；默认[在线 Simulator](https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/) 直接在浏览器运行，无需本地模拟器服务。两个公开站点通过同源浏览器存储交接固件；需要联网时可选本地 Node Simulator。完整步骤与限制见 [本地说明](LOCAL_COMPILER.zh_CN.md)。此流程不烧录实机。
+成功预览后点击 Build firmware，下载匹配源码的 full.bin 或 Send to Simulator，再点 Open Simulator。固件需要额外安装 ESP-IDF 5.5.3；默认[在线 Simulator](https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/) 直接在浏览器运行，无需本地模拟器服务。本地预览和公开网页都使用线上 Simulator，跨源通过浏览器窗口消息交接，不上传固件；需要联网时可选本地 Node Simulator。完整步骤与限制见 [本地说明](LOCAL_COMPILER.zh_CN.md)。此流程不烧录实机。

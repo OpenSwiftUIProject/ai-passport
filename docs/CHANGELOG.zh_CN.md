@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- 本地 Playground 预览支持跨源直连线上 Simulator 传递固件，无需本地模拟器地址。
 - Simulator 默认联动改为浏览器版 Pages 站点；修复修改、重置或断开编译器后残留的旧固件运行链接。
 - 新增 Open Graph 与 X 分享元数据及可下载的 Playground 封面，并更新文档记录已验证的公开 Pages 与本地编译器流程。
 

@@ -1,6 +1,7 @@
 import { compilerFetchOptions } from './compiler-config.js';
 import { simulatorURL, simulatorTransport, DEFAULT_SIMULATOR } from './simulator-config.js';
 import { sha256, stageFirmware, removeFirmware } from './browser-handoff.js';
+import { prepareWindowFirmware, messageLink, openFirmwareWindow } from './window-handoff.js';
 
 export { sha256 };
 
@@ -14,7 +15,11 @@ export function firmwareControls(currentSource) {
   const open = document.querySelector('#open-simulator');
   let endpoint, available = false, previewSource, ready, building = false, transferring = false;
   let generation = 0;
-  function invalidate() { ++generation; open.hidden = true; open.removeAttribute('href'); }
+  let windowFirmware, windowController;
+  function invalidate() {
+    ++generation; open.hidden = true; open.removeAttribute('href');
+    windowFirmware = null; windowController?.abort();
+  }
   simulator.value = new URLSearchParams(location.search).get('simulator') || DEFAULT_SIMULATOR;
   simulator.addEventListener('input', invalidate);
   function update() {
@@ -102,20 +107,28 @@ export function firmwareControls(currentSource) {
     open.hidden = true;
     const target = simulatorURL(simulator.value, location.href);
     let transport = simulatorTransport(target, location.href);
-    if (transport === 'discover') {
+    if (transport === 'discover' || transport === 'window') {
       const config = await (await request(new URL('playground-config.json', target))).json();
       if (config.service !== 'openswiftui-passport-simulator' || config.protocolVersion !== 1
           || !['indexeddb', 'http'].includes(config.transport)) {
         throw new Error('This Simulator does not support Playground firmware import.');
       }
-      transport = config.transport;
+      if (transport === 'window') {
+        if (config.windowHandoff !== true) throw new Error('This Simulator needs the browser window handoff update.');
+      } else transport = config.transport;
     }
     if (!current()) return;
     status.textContent = 'Preparing firmware for Simulator…';
     const bytes = await artifact(job);
     if (!current()) return;
     let id;
-    if (transport === 'indexeddb') {
+    windowFirmware = null;
+    if (transport === 'window') {
+      const record = await prepareWindowFirmware(bytes, job.sha256, job.sourceSha256, target.href);
+      if (!current()) return;
+      windowFirmware = record;
+      open.href = messageLink(record, location.origin).href;
+    } else if (transport === 'indexeddb') {
       id = await stageFirmware(bytes, job.sha256, job.sourceSha256, target.href);
       if (!current()) { await removeFirmware(id); return; }
     } else {
@@ -127,13 +140,28 @@ export function firmwareControls(currentSource) {
       id = result.id;
       if (!current()) return;
     }
-    open.href = new URL(`?playground=${id}`, target).href;
+    if (id) open.href = new URL(`?playground=${id}`, target).href;
     open.hidden = false;
-    status.textContent = transport === 'indexeddb'
+    status.textContent = transport === 'window'
+      ? 'Ready. Click Open Simulator to transfer directly to the online Simulator.'
+      : transport === 'indexeddb'
       ? 'Ready in this browser. Open Simulator to run it (10 minutes; no upload).'
       : 'Firmware sent. Open Simulator to run it (link lasts 10 minutes).';
     open.focus();
   });
+  open.onclick = event => {
+    if (!windowFirmware) return;
+    event.preventDefault();
+    const record = windowFirmware, ticket = generation;
+    windowController?.abort();
+    windowController = new AbortController();
+    status.textContent = 'Opening online Simulator and transferring firmware…';
+    openFirmwareWindow(record, { signal: windowController.signal }).then(() => {
+      if (ticket === generation) status.textContent = 'Firmware delivered to Simulator. No server upload.';
+    }).catch(error => {
+      if (ticket === generation) status.textContent = error.message;
+    });
+  };
   document.querySelector('#simulator-command').textContent = `git clone https://github.com/OpenSwiftUIProject/FoloToy-Passport-Simulator.git\ncd FoloToy-Passport-Simulator\nnpm ci\nnpm start -- --playground-origin ${location.origin}`;
   return {
     connected(value, canBuild) { invalidate(); endpoint = value; available = !!canBuild; ready = null; update(); },

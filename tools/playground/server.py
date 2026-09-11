@@ -21,6 +21,7 @@ FILES = {'/': ('index.html', 'text/html'), '/app.js': ('app.js', 'text/javascrip
          '/firmware.js': ('firmware.js', 'text/javascript'),
          '/simulator-config.js': ('simulator-config.js', 'text/javascript'),
          '/browser-handoff.js': ('browser-handoff.js', 'text/javascript'),
+         '/window-handoff.js': ('window-handoff.js', 'text/javascript'),
          '/worker.js': ('worker.js', 'text/javascript'), '/wasi.js': ('wasi.js', 'text/javascript'),
          '/editor.js': ('build/editor.js', 'text/javascript'),
          '/styles.css': ('styles.css', 'text/css'),

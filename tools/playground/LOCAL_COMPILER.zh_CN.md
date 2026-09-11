@@ -67,14 +67,16 @@ git clone --branch v5.5.3 --recursive https://github.com/espressif/esp-idf.git "
 工具不直接烧录，也不输出仅应用镜像；其他实机安装流程应保留设备身份与 Recovery。
 
 默认[在线 Simulator](https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/)
-不需要安装本地模拟器。从[公开 Playground](https://openswiftuiproject.github.io/ai-passport/)
-点击 **Send to Simulator**，再点 **Open Simulator**。两个页面同源，已校验固件只保存在
-当前浏览器的 IndexedDB，不上传固件。链接在同一浏览器/用户配置中 10 分钟有效，最多保留
-3 份；后续发送时清理旧记录。到期会拒绝加载，不代表浏览器存储立即删除。
-浏览器版运行 QEMU/WASM、画面和按键，不提供网络桥接或社区链接导入；也可直接选择下载的完整固件。
+不需要安装本地模拟器。本地预览和[公开 Playground](https://openswiftuiproject.github.io/ai-passport/)
+都保留默认线上地址，点击 **Send to Simulator**，再点 **Open Simulator**。
+不同源时，Open 打开新窗口并通过 `postMessage` 传递已校验固件，不上传二进制到服务器。
+请保持 Playground 打开直到发送完成；弹窗被拦截时允许后重新 Open。
+需要刷新或重新打开这份 View 时，回到 Playground 再点 Open；准备好的交接 10 分钟有效。
 
-若 Playground 与 Simulator 不同源（包括不同本地端口），请 **Download full.bin** 后在
-Simulator 选择文件，或使用带导入 API 的本地 Simulator。需要联网功能时也可选择此版本：
+同源页面也可使用 IndexedDB，链接在同一浏览器配置中 10 分钟有效，最多保留 3 份，
+后续发送时清理旧记录。到期不代表浏览器存储立即删除。交接链接不能直接分享给别人；
+分享或手动加载请下载 full.bin。浏览器版提供画面和按键，不提供固件联网或社区链接导入。
+需要这些可选功能时，再运行本地 Node 版：
 
 ```sh
 git clone https://github.com/OpenSwiftUIProject/FoloToy-Passport-Simulator.git

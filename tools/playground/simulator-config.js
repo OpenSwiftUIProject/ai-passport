@@ -14,5 +14,5 @@ export function simulatorURL(value, base) {
 export function simulatorTransport(target, pageURL) {
   if (target.origin === new URL(pageURL).origin) return 'discover';
   if (['127.0.0.1', 'localhost'].includes(target.hostname)) return 'http';
-  throw new Error('Browser handoff needs Playground and Simulator on the same website. Use the published Playground, or download full.bin and select it in Simulator.');
+  return 'window';
 }

@@ -74,6 +74,12 @@ trusted development, not an Internet-facing public compilation service.
 - `POST /firmware`, the same JSON, returns a build job ID and source SHA-256.
 - `GET /firmware/<id>` returns building/ready/failed status and a bounded log tail.
 - `GET /firmware/<id>/download` returns verified full firmware when ready.
+- Cross-origin static Simulator `GET playground-config.json` declares
+  `windowHandoff: true`. The Open click creates a window with its opener cleared;
+  `window-handoff.js` uses a random 48-hex token, exact origin and WindowProxy checks,
+  a hello/ready/firmware/received handshake, full-image checks and SHA-256 verification.
+  No binary is posted to the remote server. Editing/reset/disconnect cancels any
+  pending delivery. A local preview uses the same online Simulator URL as Pages.
 - Same-origin Simulator `GET playground-config.json` identifies protocol 1 and
   `indexeddb` transport. Both repositories ship compatible `browser-handoff.js`
   modules. The database is `openswiftui-passport-handoff-v1`, store `firmware`, keyed
