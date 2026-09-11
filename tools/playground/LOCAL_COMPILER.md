@@ -78,8 +78,20 @@ It boots the submitted ContentView. A full image is for offset **0x0**; this too
 does not flash devices or provide an application-only download. Preserve device
 identity and Recovery when using a separate hardware installation workflow.
 
-To run the image in QEMU, use a Simulator version containing the Playground
-import API. In a separate directory/terminal:
+The default [online Simulator](https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/)
+needs no local Simulator installation. From the
+[published Playground](https://openswiftuiproject.github.io/ai-passport/), click
+**Send to Simulator**, then **Open Simulator**. Both pages share an origin, so the
+checked firmware stays in this browser's IndexedDB; no firmware is uploaded.
+The link works in the same browser/profile for ten minutes. Up to three images
+are retained, with old entries pruned on subsequent sends. Expiry prevents loading;
+it does not promise immediate deletion of browser storage. This browser edition
+runs QEMU/WASM, display and buttons, but has no network bridge or community-link
+import. Downloaded full images can also be selected directly in Simulator.
+
+If Playground and Simulator are on different origins (including different local
+ports), use **Download full.bin** and the Simulator file picker, or run the local
+Simulator with its import API. This optional version also provides networking:
 
 ```sh
 git clone https://github.com/OpenSwiftUIProject/FoloToy-Passport-Simulator.git
@@ -88,16 +100,12 @@ npm ci
 npm start -- --playground-origin https://openswiftuiproject.github.io
 ```
 
-Use the actual page origin in that command too. The Simulator defaults to
-`http://127.0.0.1:4190/`. Enter its URL, click **Send to Simulator**, then **Open
-Simulator** to run. The explicit link avoids popup blockers. The image is handed
-over as bytes, with SHA-256 validation; nothing is published or uploaded to the
-community. The Simulator retains up to three images in memory for ten minutes.
-Its cross-origin isolation stays enabled. The local upload capability and an
-explicit `--playground-origin` are both required; a default community-only server
-rejects this API. The OpenSwiftUIProject fork includes this integration on main;
-an older Simulator checkout can still load the downloaded full.bin using its
-local firmware file picker.
+Use the actual page origin in that command. Set Simulator URL to
+`http://127.0.0.1:4190/`, then Send and Open. The Node service requires local
+upload enabled and the explicit allowed origin; it keeps up to three images in
+memory for ten minutes and validates SHA-256. The upstream public Render service
+does not offer this handoff API. `?simulator=...` can prefill another Simulator
+URL; it never triggers a transfer automatically.
 
 Editing invalidates download/send controls until the current source has both a
 successful preview and matching firmware. Preview state is not transferred:
@@ -109,9 +117,10 @@ build targets and runtime behavior can differ.
 - Connection refused: check the running terminal and configured port.
 - Origin error: `localhost`, `127.0.0.1` and different ports are distinct origins.
 - Browser blocks loopback: allow local network access, or use the local editor
-  at `http://127.0.0.1:4191/`. Browser and embedded-webview behavior varies; public
-  HTTPS Pages-to-loopback compatibility has not yet been validated. Do not disable
-  browser security or expose the trusted compiler through a public tunnel.
+  at `http://127.0.0.1:4191/`. The public HTTPS Pages site has been verified with
+  the loopback compiler and Simulator in the Codex in-app browser on macOS.
+  Other browser permission flows remain unverified. Do not disable browser
+  security or expose the trusted compiler through a public tunnel.
 - Missing ESP-IDF: install it, restart the compiler, and reconnect to refresh capabilities.
 - Expired Simulator link: send the firmware again. Rejected import: verify the
   Simulator version, local upload capability and allowed page origin.

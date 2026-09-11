@@ -4,6 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>OpenSwiftUI · Passport Playground</title>
+  <meta name="description" content="Try a Swift view in your browser. Connect a local compiler to edit ContentView, preview with WebAssembly and build AI Passport firmware.">
+  <link rel="canonical" href="https://openswiftuiproject.github.io/ai-passport/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="OpenSwiftUI">
+  <meta property="og:title" content="OpenSwiftUI Playground · AI Passport">
+  <meta property="og:description" content="Try a Swift view in your browser. Connect a local compiler to edit ContentView, preview with WebAssembly and build AI Passport firmware.">
+  <meta property="og:url" content="https://openswiftuiproject.github.io/ai-passport/">
+  <meta property="og:image" content="https://openswiftuiproject.github.io/ai-passport/social-card.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="OpenSwiftUI Playground with a ContentView code excerpt and the actual AI Passport demo preview, showing the pixel-art spark and Hello, OpenSwiftUI!">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OpenSwiftUI Playground · AI Passport">
+  <meta name="twitter:description" content="Try a Swift view in your browser. Connect a local compiler to edit ContentView, preview with WebAssembly and build AI Passport firmware.">
+  <meta name="twitter:image" content="https://openswiftuiproject.github.io/ai-passport/social-card.png">
+  <meta name="twitter:image:alt" content="OpenSwiftUI Playground with a ContentView code excerpt and the actual AI Passport demo preview, showing the pixel-art spark and Hello, OpenSwiftUI!">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
@@ -60,14 +77,17 @@
         <button id="build-firmware" disabled>Build firmware</button>
         <button id="download-firmware" disabled>Download full.bin</button>
         <label for="simulator-url">Simulator URL</label>
-        <input id="simulator-url" type="url" value="http://127.0.0.1:4190/" spellcheck="false">
+        <input id="simulator-url" type="url" value="https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/" spellcheck="false">
         <button id="send-firmware" disabled>Send to Simulator</button>
         <a id="open-simulator" target="_blank" rel="noopener" hidden>Open Simulator ↗</a>
         <p id="firmware-status" role="status">Connect your compiler to build firmware.</p>
         <details><summary>Firmware build log</summary><pre id="firmware-log"></pre></details>
         <details><summary>Set up firmware &amp; Simulator</summary>
           Firmware builds also require ESP-IDF 5.5.3. <a href="./LOCAL_COMPILER.md">Full setup instructions</a>.
-          Start a Simulator with Playground import support, allowing this website:
+          The default online Simulator runs in this browser. Use it with the
+          <a href="https://openswiftuiproject.github.io/ai-passport/">published Playground</a>.
+          For a local Simulator with networking, start this service and set the URL to
+          <code>http://127.0.0.1:4190/</code>:
           <pre id="simulator-command"></pre>
         </details>
       </section>

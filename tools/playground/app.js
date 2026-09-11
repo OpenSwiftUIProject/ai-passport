@@ -170,6 +170,7 @@ document.querySelector('#run').onclick = compile;
 auto.onchange = () => { clearTimeout(timer); if (auto.checked) compile(); };
 document.querySelector('#reset').onclick = () => {
   editor.value = example; ++generation; diagnostics.textContent = '';
+  firmware.edited();
   if (compileEndpoint) compile();
   else if (precompiled) startPreview(precompiled.slice(0), 'Live · precompiled example · runs entirely in your browser', generation, example);
   else report('Connect a compiler to rebuild the example.');

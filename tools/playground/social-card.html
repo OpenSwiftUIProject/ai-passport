@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSwiftUI Playground · Share card source</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #101b23; }
+    #card { position: relative; width: 1200px; height: 630px; overflow: hidden;
+      background: radial-gradient(ellipse at 95% 0%, #234348, transparent 62%), #101b23;
+      color: #f4f7f5; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    .accent { position: absolute; top: 0; left: 0; right: 0; height: 5px; background: #a5ecc4; }
+    .eyebrow { position: absolute; top: 48px; left: 56px; color: #a5ecc4;
+      font-size: 17px; font-weight: 600; letter-spacing: 2.6px; }
+    h1 { position: absolute; top: 95px; left: 52px; margin: 0;
+      font-size: 76px; letter-spacing: -3px; line-height: 1.08; font-weight: 700; }
+    h1 span { color: #a5ecc4; }
+    .intro { position: absolute; top: 278px; left: 56px; margin: 0;
+      color: #ccd9df; font-size: 25px; letter-spacing: -.3px; }
+    pre { position: absolute; top: 331px; left: 56px; width: 658px; margin: 0;
+      padding: 18px 24px; border: 1px solid #344951; border-radius: 14px;
+      background: #14232c; font: 19px/27px ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #e4edf2; }
+    .type { color: #a6dce9; } .string { color: #a5ecc4; } .number { color: #e4be84; }
+    .device { position: absolute; top: 92px; right: 71px; width: 284px;
+      padding: 28px 20px 18px; border: 2px solid #637c81; border-radius: 28px;
+      background: #0c141b; box-shadow: 0 24px 64px #0005; }
+    .device img { display: block; width: 240px; height: 320px; image-rendering: pixelated; }
+    .buttons { display: flex; justify-content: space-between; padding-top: 20px; }
+    .buttons span { width: 69px; border: 1px solid #425760; border-radius: 7px;
+      padding: 10px 0; text-align: center; font-size: 13px; color: #cad7dc; }
+    .note { position: absolute; top: 551px; left: 56px; margin: 0;
+      color: #9caeb7; font-size: 17px; }
+    .url { position: absolute; top: 554px; right: 56px; margin: 0;
+      color: #a5ecc4; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <main id="card" aria-label="OpenSwiftUI Playground social sharing card">
+    <div class="accent"></div>
+    <div class="eyebrow">SWIFT · WEBASSEMBLY · AI PASSPORT</div>
+    <h1>OpenSwiftUI<br><span>Playground</span></h1>
+    <p class="intro">From ContentView to your Passport.</p>
+    <pre><span class="type">VStack</span>(spacing: <span class="number">12</span>) {
+    <span class="type">Image</span>(<span class="string">"spark"</span>).resizable()
+        .frame(width: <span class="number">80</span>, height: <span class="number">80</span>)
+    <span class="type">Text</span>(<span class="string">"Hello, OpenSwiftUI!"</span>)
+}</pre>
+    <div class="device">
+      <img src="../../assets/images/openswiftui-playground-screen.png" alt="Actual OpenSwiftUI demo preview">
+      <div class="buttons"><span>UP</span><span>DOWN</span><span>OK</span></div>
+    </div>
+    <p class="note">Live editing with your local Swift compiler.</p>
+    <p class="url">openswiftuiproject.github.io/ai-passport</p>
+  </main>
+</body>
+</html>

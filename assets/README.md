@@ -32,6 +32,17 @@ in Flash, read directly by an LVGL image descriptor and scaled with nearest
 neighbor filtering. Created for this project under its MIT license; no external
 artwork or runtime decoder is used. Its palette is recorded in the header.
 
+`images/openswiftui-playground-social.png` is the 1200 × 630 PNG sharing card
+used by the Playground's Open Graph and X metadata. The exporter publishes it as
+`social-card.png`; it is a website asset, not embedded in firmware.
+The editable layout is [social-card.html](../tools/playground/social-card.html).
+Serve the repository root, open that HTML and capture its `#card` at 1200 × 630
+CSS pixels with a device scale factor of 1 to regenerate the PNG.
+Its `images/openswiftui-playground-screen.png` input is an unmodified 240 × 320
+host-rendered frame of the original OpenSwiftUI demo, with a fixed battery fixture.
+The layout and pixel art are project originals under MIT; the rendered LVGL
+Montserrat font retains its OFL attribution in the exported third-party notices.
+
 ## Music and sound effects
 
 Store reusable music and sound-effect sources in `music/`.

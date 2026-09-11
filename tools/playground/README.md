@@ -52,7 +52,7 @@ Run from the repository root:
 ```sh
 ./tools/playground/start-compiler.sh --export-pages build/pages/ai-passport
 python3 -m unittest discover -s tools/playground -p 'test_*.py'
-node --test tools/playground/compiler-config.test.mjs
+node --test tools/playground/*.test.mjs
 cd tools/playground
 node smoke.mjs
 node verify-static.mjs ../../build/pages/ai-passport
@@ -76,4 +76,4 @@ For the GitHub Pages workflow and publication layout, see [deployment](DEPLOYMEN
 
 ## Firmware and Simulator
 
-After a successful preview, click Build firmware, then download the matching full.bin or Send to Simulator and Open Simulator. Firmware requires ESP-IDF 5.5.3; the Simulator needs the import API and must allow the current page origin. See [local setup](LOCAL_COMPILER.md) for the full steps and limits. This workflow does not flash hardware.
+After a successful preview, click Build firmware, then download the matching full.bin or Send to Simulator and Open Simulator. Firmware requires ESP-IDF 5.5.3; the default [online Simulator](https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/) runs in your browser without a local Simulator service. The two published sites hand over firmware through same-origin browser storage. The local Node Simulator remains optional for networking. See [local setup](LOCAL_COMPILER.md) for the full steps and limits. This workflow does not flash hardware.

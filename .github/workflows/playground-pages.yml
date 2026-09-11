@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'tools/playground/**'
+      - 'assets/images/openswiftui-playground-*.png'
       - 'skills/ai-passport-local-compiler/**'
       - 'main/**'
       - 'tests/openswiftui-lvgl/**'
@@ -13,6 +14,7 @@ on:
     branches: [main]
     paths:
       - 'tools/playground/**'
+      - 'assets/images/openswiftui-playground-*.png'
       - 'skills/ai-passport-local-compiler/**'
       - 'main/**'
       - 'tests/openswiftui-lvgl/**'
@@ -53,7 +55,7 @@ jobs:
         working-directory: tools/playground
         run: |
           python3 -m unittest discover -p 'test_*.py'
-          node --test compiler-config.test.mjs
+          node --test ./*.test.mjs
           node smoke.mjs
           node verify-static.mjs ../../build/pages/ai-passport
       - uses: actions/upload-pages-artifact@98ef48e41587a300b82de4cf298aa98b57b2faae

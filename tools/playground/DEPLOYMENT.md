@@ -3,11 +3,11 @@
 # GitHub Pages deployment
 
 The destination repository is [OpenSwiftUIProject/ai-passport](https://github.com/OpenSwiftUIProject/ai-passport),
-with intended entry https://openswiftuiproject.github.io/ai-passport/.
+with public entry https://openswiftuiproject.github.io/ai-passport/.
 The Pages workflow builds the static frontend, example WASM and standalone setup
 skill. Visitors can play immediately; arbitrary Swift editing and firmware
-builds use their own local compiler. Simulator runs separately with its Node/QEMU
-runtime. None of these require the creator's computer to stay online.
+builds use their own local compiler. The [Simulator Pages site](https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/)
+runs QEMU/WASM entirely in the browser; its optional Node edition adds networking. None of these require the creator's computer to stay online.
 
 ## Build and review locally
 
@@ -42,8 +42,23 @@ supports manual dispatch. Local preparation does not enable Pages or publish it.
 
 The build uses macOS, Swift 6.3.1, Node 22, CMake/Ninja and the pinned dependency
 bootstrap. It does not install ESP-IDF or package a device firmware; firmware is
-built on demand on the visitor's machine. Public Pages deployment and public
-HTTPS-to-loopback permissions have not yet been exercised by this local change.
+built on demand on the visitor's machine. Public Pages deployment and the full
+HTTPS-to-loopback flow (Swift editing, preview, firmware build and Simulator
+handoff) were verified in the Codex in-app browser on macOS on 2026-09-10.
+Other browser permission flows remain unverified; these checks did not flash
+physical hardware.
+
+## Social sharing
+
+The initial HTML includes Open Graph and X large-image card metadata, with the
+canonical public URL and an absolute HTTPS image URL. Crawlers do not need to run
+the editor. The exporter copies `assets/images/openswiftui-playground-social.png`
+to `social-card.png` and includes it in the checksums and site ZIP.
+The local compiler also serves that image path. See the
+[asset record](https://github.com/OpenSwiftUIProject/ai-passport/blob/main/assets/README.md)
+for the editable card source and preview provenance.
+After publication, check the public image URL and the card on X; local validation
+cannot establish when X will refresh a cached link preview.
 
 ## Compiler and Simulator contracts
 
@@ -59,7 +74,15 @@ trusted development, not an Internet-facing public compilation service.
 - `POST /firmware`, the same JSON, returns a build job ID and source SHA-256.
 - `GET /firmware/<id>` returns building/ready/failed status and a bounded log tail.
 - `GET /firmware/<id>/download` returns verified full firmware when ready.
-- Simulator `POST /api/playground-firmware` accepts that binary with
+- Same-origin Simulator `GET playground-config.json` identifies protocol 1 and
+  `indexeddb` transport. Both repositories ship compatible `browser-handoff.js`
+  modules. The database is `openswiftui-passport-handoff-v1`, store `firmware`, keyed
+  by a random 48-hex `id`. Records contain `version: 1`, an ArrayBuffer `bytes`,
+  `sha256`, `sourceSha256`, the destination base URL and `expiresAt` (milliseconds).
+  The reader checks size, image header, expiry, destination and SHA-256. Links keep
+  the Simulator project path: `/FoloToy-Passport-Simulator/?playground=<id>`.
+  This works within one browser profile/origin, not as a shareable firmware URL.
+- Local Node Simulator `POST /api/playground-firmware` accepts that binary with
   `X-Firmware-SHA256`, returning an expiring `/?playground=<id>` run link.
   It requires local upload enabled plus an explicit allowed Playground origin.
 
