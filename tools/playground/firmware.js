@@ -145,8 +145,8 @@ export function firmwareControls(currentSource) {
     status.textContent = transport === 'window'
       ? 'Ready. Click Open Simulator to transfer directly to the online Simulator.'
       : transport === 'indexeddb'
-      ? 'Ready in this browser. Open Simulator to run it (10 minutes; no upload).'
-      : 'Firmware sent. Open Simulator to run it (link lasts 10 minutes).';
+      ? 'Ready locally in this browser. Click Open Simulator to run it. This temporary transfer expires in 10 minutes; your firmware is never uploaded.'
+      : 'Firmware sent to Simulator. Click Open Simulator to run it; this link expires in 10 minutes.';
     open.focus();
   });
   open.onclick = event => {
