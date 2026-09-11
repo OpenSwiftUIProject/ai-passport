@@ -29,6 +29,15 @@
 LVGL 图像描述符直接引用，并使用最近邻缩放。资源遵循本项目 MIT 许可，
 不使用外部图片或运行时解码器，调色板记录在头文件中。
 
+`images/openswiftui-playground-social.png` 是 Playground 的 Open Graph 与 X 元数据
+使用的 1200 × 630 PNG 分享卡片，导出为 `social-card.png`，只用于网站，不嵌入固件。
+可编辑布局为 [social-card.html](../tools/playground/social-card.html)。
+以仓库根目录启动静态服务器，打开该 HTML，以 1 倍设备缩放截取 `#card` 的
+1200 × 630 CSS 像素区域，即可重新生成 PNG。
+其中 `images/openswiftui-playground-screen.png` 是原始 OpenSwiftUI 演示在主机渲染的
+240 × 320 原样画面，电量为固定测试值。布局与像素角色为项目原创、遵循 MIT；
+画面中的 LVGL Montserrat 字体在导出产物的第三方声明中保留 OFL 署名。
+
 ## 音乐与音效（music）
 
 可复用的音乐与音效源码放在 `music/`。

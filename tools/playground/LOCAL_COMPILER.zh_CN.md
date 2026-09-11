@@ -66,7 +66,17 @@ git clone --branch v5.5.3 --recursive https://github.com/espressif/esp-idf.git "
 镜像，并校验 SHA-256。它启动当前 ContentView，完整镜像对应 **0x0** 偏移。
 工具不直接烧录，也不输出仅应用镜像；其他实机安装流程应保留设备身份与 Recovery。
 
-使用包含 Playground 导入 API 的 Simulator 在 QEMU 中运行。另开目录与终端：
+默认[在线 Simulator](https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/)
+不需要安装本地模拟器。本地预览和[公开 Playground](https://openswiftuiproject.github.io/ai-passport/)
+都保留默认线上地址，点击 **Send to Simulator**，再点 **Open Simulator**。
+不同源时，Open 打开新窗口并通过 `postMessage` 传递已校验固件，不上传二进制到服务器。
+请保持 Playground 打开直到发送完成；弹窗被拦截时允许后重新 Open。
+需要刷新或重新打开这份 View 时，回到 Playground 再点 Open；准备好的交接 10 分钟有效。
+
+同源页面也可使用 IndexedDB，链接在同一浏览器配置中 10 分钟有效，最多保留 3 份，
+后续发送时清理旧记录。到期不代表浏览器存储立即删除。交接链接不能直接分享给别人；
+分享或手动加载请下载 full.bin。浏览器版提供画面和按键，不提供固件联网或社区链接导入。
+需要这些可选功能时，再运行本地 Node 版：
 
 ```sh
 git clone https://github.com/OpenSwiftUIProject/FoloToy-Passport-Simulator.git
@@ -75,12 +85,10 @@ npm ci
 npm start -- --playground-origin https://openswiftuiproject.github.io
 ```
 
-此命令也要用当前页面的实际 origin。Simulator 默认 `http://127.0.0.1:4190/`。
-输入 URL，点击 **Send to Simulator**，再点 **Open Simulator** 即可运行，显式链接可避开
-弹窗拦截。传递的是同一份固件字节并校验 SHA-256，不会发布到社区。
-Simulator 最多在内存保留 3 份镜像、10 分钟有效，跨源隔离保持开启。
-必须同时启用本地上传能力与显式 `--playground-origin`，默认仅社区部署会拒绝此 API。
-OpenSwiftUIProject fork 的 main 包含此集成；旧版仍可通过本地固件文件选择器加载下载的 full.bin。
+命令使用当前页面的实际 origin。Simulator URL 填 `http://127.0.0.1:4190/`，再 Send / Open。
+Node 服务需要同时启用本地上传与显式允许来源，在内存保留最多 3 份镜像、10 分钟有效并检查
+SHA-256。上游公开 Render 站点不提供此交接 API。`?simulator=...` 可预填其他 Simulator
+URL，但不会自动发送。
 
 修改代码后，下载和发送按钮会失效，直到当前源码预览成功且有匹配固件。
 预览中的 State 不会传过去，Simulator 从初始状态启动。WASM 与固件属于不同编译目标，
@@ -91,8 +99,8 @@ OpenSwiftUIProject fork 的 main 包含此集成；旧版仍可通过本地固�
 - 拒绝连接：确认终端仍运行且端口正确。
 - 来源错误：localhost、127.0.0.1 和不同端口是不同来源。
 - 浏览器拦截回环访问：允许本地网络访问，或打开 `http://127.0.0.1:4191/` 本地编辑器。
-  各浏览器及内嵌 WebView 行为不同；公开 HTTPS Pages 到回环服务尚未验证。勿关闭浏览器
-  安全机制或通过公共隧道暴露本地编译器。
+  已在 macOS 的 Codex 内嵌浏览器验证公开 HTTPS Pages 连接回环编译器和 Simulator。
+  其他浏览器的权限流程尚未验证。勿关闭浏览器安全机制或通过公共隧道暴露本地编译器。
 - 缺少 ESP-IDF：安装后重启服务并重新 Connect，以刷新能力。
 - Simulator 链接过期：重新发送；拒绝导入时检查版本、本地上传能力与允许来源。
 - 缓存源码变动：启动器拒绝覆盖，换缓存目录或显式指定开发源码。

@@ -6,6 +6,10 @@
 
 ## Unreleased
 
+- Local Playground previews can send firmware directly to the online Simulator across origins; no local Simulator URL is required.
+- Default Simulator handoff now opens the browser-only Simulator Pages site; fixed stale run links after edits, reset or disconnect.
+- Added Open Graph and X sharing metadata with a downloadable Playground cover; updated the documentation to record the verified public Pages and local compiler flow.
+
 - Fixed clean-runner host and firmware CI by installing Swift 6.3.1, pinned OpenSwiftUI sources and ESP-IDF explicitly; shared the setup with release builds and made actionlint checksum validation portable to macOS.
 
 - Added the OpenSwiftUI browser Playground, Swift highlighting, a standalone local compiler setup skill and ai-passport Pages workflow; build matching full firmware, download it or hand it to Simulator.

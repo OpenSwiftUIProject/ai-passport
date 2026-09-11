@@ -46,17 +46,18 @@ def main():
     subprocess.run(['node', str(ROOT / 'build-editor.mjs')], check=True)
     build.compile_view(ROOT / 'ContentView.swift', build.BUILD / 'static-example.wasm')
     output.mkdir(parents=True, exist_ok=True)
-    for name in ['index.html', 'styles.css', 'app.js', 'compiler-config.js', 'firmware.js', 'worker.js', 'wasi.js',
+    for name in ['index.html', 'styles.css', 'app.js', 'compiler-config.js', 'firmware.js', 'simulator-config.js', 'browser-handoff.js', 'window-handoff.js', 'worker.js', 'wasi.js',
                  'ContentView.swift', 'LOCAL_COMPILER.md', 'LOCAL_COMPILER.zh_CN.md',
                  'DEPLOYMENT.md', 'DEPLOYMENT.zh_CN.md', 'README.md', 'README.zh_CN.md']:
         shutil.copy2(ROOT / name, output / name)
     shutil.copy2(ROOT / 'build/editor.js', output / 'editor.js')
+    shutil.copy2(build.REPOSITORY / 'assets/images/openswiftui-playground-social.png', output / 'social-card.png')
     shutil.copy2(build.BUILD / 'static-example.wasm', output / 'preview.wasm')
-    # All URLs are relative, including Worker imports, so a /repo/ Pages base works.
+    # Runtime assets use relative URLs, including Worker imports, for a /repo/ Pages base.
+    # Social metadata deliberately identifies the canonical public site.
     config = {
         'mode': 'remote' if args.compile_endpoint else 'static',
         'compileEndpoint': args.compile_endpoint,
-        'simulatorUrl': None,
         'precompiled': {'file': './preview.wasm', 'sha256': digest(output / 'preview.wasm'),
                         'sourceSha256': digest(output / 'ContentView.swift')},
     }

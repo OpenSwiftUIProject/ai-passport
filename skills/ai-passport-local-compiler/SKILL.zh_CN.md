@@ -83,4 +83,4 @@ HTTPS 页面访问本机受各浏览器权限策略影响，可改用 `http://12
 
 ## 可选：固件与 Simulator
 
-用户需要下载或模拟运行固件时，在 clone 后读取 `tools/playground/LOCAL_COMPILER.zh_CN.md` 的完整 ESP-IDF 5.5.3 和 Simulator 安装命令。检查 Swift Embedded RISC-V 库、复用已有 IDF_PATH / IDF_TOOLS_PATH，否则按说明安装到同级 toolchains。重启编译器并重新 Connect。成功预览后 Build firmware，核对源码匹配，再 Download full.bin 或 Send to Simulator。Simulator 单独 clone 完整 URL `https://github.com/OpenSwiftUIProject/FoloToy-Passport-Simulator.git`，npm ci 后 `npm start -- --playground-origin <当前网页实际 origin>`；需要包含导入 API 的版本。使用已包含此集成的 OpenSwiftUIProject fork main；旧版仍可通过本地文件选择器加载下载的固件。不要将 WASM 当作设备固件，也不要自动烧录。
+用户需要下载或模拟运行固件时，在 clone 后读取 `tools/playground/LOCAL_COMPILER.zh_CN.md` 的完整 ESP-IDF 5.5.3 和 Simulator 安装命令。检查 Swift Embedded RISC-V 库、复用已有 IDF_PATH / IDF_TOOLS_PATH，否则按说明安装到同级 toolchains。重启编译器并重新 Connect。成功预览后 Build firmware，核对源码匹配，再 Download full.bin 或 Send to Simulator。公开 Playground 默认连接 https://openswiftuiproject.github.io/FoloToy-Passport-Simulator/，模拟器在浏览器运行，无需本地安装。本地预览也保持此线上 URL。Open Simulator 通过浏览器窗口消息跨源传递固件，发送完成前保持 Playground 打开。弹窗被拦截时允许后再次 Open，也可下载完整固件后手动选择。仅在需要联网或本地 API 交接时 clone 并启动 Node Simulator，完整仓库 URL 和命令见 LOCAL_COMPILER.zh_CN.md。不要将 WASM 当作设备固件，也不要自动烧录。
