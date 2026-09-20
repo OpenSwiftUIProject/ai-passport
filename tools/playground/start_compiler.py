@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent
 REPOSITORY = ROOT.parents[1]
 DEPENDENCIES = {
     'OPENSWIFTUI_SOURCE_DIR': ('OpenSwiftUI', 'https://github.com/OpenSwiftUIProject/OpenSwiftUI.git',
-                              'e35b91a31789c3c277e9a784b9f9b86e5eb708f5'),
+                              '098b5a28985d55a1d949cc03c1292b80680704e9'),
     'LVGL_SOURCE_DIR': ('lvgl', 'https://github.com/lvgl/lvgl.git',
                        '85aa60d18b3d5e5588d7b247abf90198f07c8a63'),  # v9.5.0
 }

@@ -8,13 +8,21 @@ fi
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 osui_root="${OPENSWIFTUI_SOURCE_DIR:-${repo_root}/../framework/OpenSwiftUI}"
 preview_build="${PASSPORT_PREVIEW_BUILD_DIR:-${repo_root}/../work/openswiftui-preview}"
+swift_mode="${PASSPORT_SWIFT_MODE:-embedded}"
+language_flags=(-wmo -Osize -parse-as-library)
+case "${swift_mode}" in
+    embedded) language_flags+=(-enable-experimental-feature Embedded) ;;
+    standard) ;;
+    *) echo "PASSPORT_SWIFT_MODE must be embedded or standard" >&2; exit 2 ;;
+esac
 output="$1"
 mkdir -p "${preview_build}"
 cmake -S "${repo_root}/managed_components/lvgl__lvgl" -B "${preview_build}/lvgl" -G Ninja \
     -DCMAKE_BUILD_TYPE=Release -DLV_BUILD_CONF_PATH="${repo_root}/tests/openswiftui-lvgl/lv_conf.h" \
     -DCONFIG_LV_BUILD_EXAMPLES=OFF -DCONFIG_LV_BUILD_DEMOS=OFF -DCONFIG_LV_USE_THORVG_INTERNAL=OFF
 cmake --build "${preview_build}/lvgl" --target lvgl --parallel 8
-python3 "${osui_root}/Scripts/build_embedded.py" --target host --output "${preview_build}/swift"
+python3 "${osui_root}/Scripts/build_embedded.py" --target host --platform folotoy \
+    --swift-mode "${swift_mode}" --output "${preview_build}/swift"
 cd "${repo_root}"
 includes=(-Itests/openswiftui-lvgl/include -Itests/swift-interop/include -Imain -Imain/swift \
     -Icomponents/bsp/include -Imanaged_components/lvgl__lvgl -Itests/openswiftui-lvgl \
@@ -26,7 +34,8 @@ host_flags=()
 if [[ "$(uname -s)" == Darwin ]]; then
     host_flags=(-sdk "$(xcrun --show-sdk-path)")
 fi
-swiftc -enable-experimental-feature Embedded -wmo -Osize -parse-as-library \
+swiftc "${language_flags[@]}" \
+    -DOPENSWIFTUI_LVGL -DOPENSWIFTUI_PLATFORM_FOLOTOY \
     "${host_flags[@]}" -I "${preview_build}/swift" -Xcc -Itests/swift-interop/include \
     -import-bridging-header main/swift/PassportBridge.h \
     main/swift/PassportCore/PassportState.swift main/swift/PassportDemo.swift \

@@ -39,8 +39,8 @@ struct ContentView: View {
         }
         .padding(12)
         .background(Color(red: 0.055, green: 0.09, blue: 0.16))
-        .onPhyicButton(.up) { palette = (palette + 2) % 3 }
-        .onPhyicButton(.down) { palette = (palette + 1) % 3 }
-        .onPhyicButton(.ok) { showImage.toggle() }
+        .onPhyicButton(.upArrow) { palette = (palette + 2) % 3 }
+        .onPhyicButton(.downArrow) { palette = (palette + 1) % 3 }
+        .onPhyicButton(.select) { showImage.toggle() }
     }
 }

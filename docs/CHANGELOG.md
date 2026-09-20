@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- Separated generic `OPENSWIFTUI_LVGL` rendering from `OPENSWIFTUI_PLATFORM_FOLOTOY` input; firmware, WASM and Passport previews enable both. Updated to profile 5 and upstream `.upArrow` / `.downArrow` / `.select` button names, with ordinary Swift macOS LVGL previews and profile-boundary tests.
 - Local Playground previews can send firmware directly to the online Simulator across origins; no local Simulator URL is required.
 - Default Simulator handoff now opens the browser-only Simulator Pages site; fixed stale run links after edits, reset or disconnect.
 - Added Open Graph and X sharing metadata with a downloadable Playground cover; updated the documentation to record the verified public Pages and local compiler flow.

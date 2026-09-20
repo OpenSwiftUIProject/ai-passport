@@ -29,9 +29,9 @@ struct Game2048View: View {
             Game2048BoardView(game: game, moving: moving)
             Game2048ControlsView(axis: game.axis, status: game.status)
         }
-        .onPhyicButton(.up) { handle(.up) }
-        .onPhyicButton(.down) { handle(.down) }
-        .onPhyicButton(.ok) { handle(.confirm) }
+        .onPhyicButton(.upArrow) { handle(.up) }
+        .onPhyicButton(.downArrow) { handle(.down) }
+        .onPhyicButton(.select) { handle(.confirm) }
     }
 
     private func handle(_ action: Game2048.Action) {

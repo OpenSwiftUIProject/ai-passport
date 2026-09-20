@@ -25,9 +25,9 @@ struct ContentView: View {
         }
         .padding(12)
         .background(useBlue ? Color.blue : Color.black)
-        .onPhyicButton(.up) { useBlue = false }
-        .onPhyicButton(.down) { useBlue = true }
-        .onPhyicButton(.ok) { showImage.toggle() }
+        .onPhyicButton(.upArrow) { useBlue = false }
+        .onPhyicButton(.downArrow) { useBlue = true }
+        .onPhyicButton(.select) { showImage.toggle() }
     }
 }
 ```
@@ -86,7 +86,7 @@ OK 短按在松开时生效，无需等待双击窗口。快速连按按独立�
 多占 24 KB 静态 RAM。64 位主机预览检查内存池并报告峰值；设备堆内存测量
 仍需单独上板验收。
 
-带动画的游戏需要 `embed/folotoy` 分支上的 OpenSwiftUI Embedded profile 4，
+带动画的游戏需要 `embed/folotoy` 分支上的 OpenSwiftUI LVGL profile 5，
 无需增加其他框架仓库。当前配置只提供静态文本，尚无动态 `ForEach`，因此有限的
 方块标签和六位分数用 `StaticString` 表示，背景行及前景槽位明确声明。
 参考了 [eleev/swiftui-2048](https://github.com/eleev/swiftui-2048) 与
@@ -147,7 +147,8 @@ ESP-IDF 在自己的构建目录内生成框架模块和静态库；LVGL 主机�
 export OPENSWIFTUI_SOURCE_DIR=/absolute/path/to/OpenSwiftUI
 ```
 
-该 checkout 需要包含 `Embedded/sources.txt` 和 `Embedded/idf.cmake`。
+该 checkout 需要包含 `Embedded/sources.txt`、`Embedded/folotoy-sources.txt`
+和 `Embedded/idf.cmake`（profile 5 或更新）。
 固件会自动构建并链接框架，无需手动复制静态库或配置 OAG。
 独立主机构建与渲染接收器的接口要求见
 [OpenSwiftUI Embedded 指南](https://github.com/OpenSwiftUIProject/OpenSwiftUI/blob/embed/folotoy/Embedded/README.md)。
@@ -175,12 +176,31 @@ tools/with-env.sh idf.py size
 ```
 
 选中的框架源码变化时会自动重新编译独立 OpenSwiftUI 模块。
-框架中的 `Embedded/sources.txt` 定义裁剪清单，`Embedded/idf.cmake` 接入 IDF。
+框架中的 `Embedded/sources.txt` 选择通用 LVGL 源码，`Embedded/folotoy-sources.txt`
+加入 FoloToy 输入适配器，`Embedded/idf.cmake` 通过 `PLATFORM folotoy` 接入 IDF。
 首次构建前可设置 `OPENSWIFTUI_SOURCE_DIR` 指向另一份 clone；已有 CMake 缓存
 使用 `idf.py -DOPENSWIFTUI_SOURCE_DIR=... build` 修改。
 框架的 `Embedded/README.md` 还说明了独立主机构建与测试，不需要 ESP-IDF 或 LVGL。
-框架构建脚本同时启用 LVGL 标志和编译器的 Embedded Swift 模式，对应
-`OPENSWIFTUI_LVGL && hasFeature(Embedded)` 条件。
+编译选项各自独立：
+
+| 选项 | 职责 |
+| --- | --- |
+| `OPENSWIFTUI_LVGL` | 通用渲染、布局、保留的 State 与动画。 |
+| `OPENSWIFTUI_PLATFORM_FOLOTOY` | 板级输入：`PhysicalButton`、`onPhyicButton` 与 host `send`。 |
+| Embedded Swift 语言模式 | 编译器／运行时选择，与渲染配置独立。 |
+
+Passport 固件、WASM 和主机预览都定义两个宏。物理 UP、DOWN、OK 分别映射到上游的
+`.upArrow`、`.downArrow`、`.select`；旧物理按键名称 `.up` / `.down` / `.ok` 不再支持。
+其他 LVGL 平台可以不启用 FoloToy 宏与适配器源码。macOS 普通 Swift 也能使用该 LVGL
+配置，不再以 `hasFeature(Embedded)` 为前提。通过普通 Swift 验证固件的真实 LVGL 渲染器：
+
+```bash
+PASSPORT_SWIFT_MODE=standard PASSPORT_PREVIEW_BUILD_DIR=../work/openswiftui-native \
+    tools/with-env.sh ./tools/preview-openswiftui.sh ../work/openswiftui-native.png
+```
+
+默认预览仍使用 `embedded` 模式。两种模式都输出 PNG fixture，不会打开原生窗口。
+框架与客户端必须使用相同的宏和语言模式，并一起重新构建为 profile 5。
 
 工具链：**ESP-IDF 5.5.3**、带 RISC-V Embedded 库的 **Swift 6.3.1 RELEASE**、
 CMake 3.29+、Ninja 和 Python 3.12。`tools/with-env.sh` 只激活当前命令，默认选择
@@ -198,7 +218,7 @@ CMake 3.29+、Ninja 和 Python 3.12。`tools/with-env.sh` 只激活当前命令�
 | `Image("spark")`、`.resizable()` | 默认采用资源固有尺寸；显式 resizable 后响应尺寸提议，以最近邻缩放 |
 | `Text("literal")`、`.foregroundStyle(Color)` | 使用真实 Montserrat 14 字体测量，并按宽度换行；没有动态本地化或中文字库 |
 | `VStack`、`HStack`、`VStackLayout`、`HStackLayout` | 测量与放置布局、显式间距、边缘／居中对齐及弹性空间分配 |
-| `onPhyicButton(.up/.down/.ok) { ... }` | 平台分发的同步按键 closure；第一个匹配的处理器消费事件 |
+| `onPhyicButton(.upArrow/.downArrow/.select) { ... }` | 平台分发的同步按键 closure；第一个匹配的处理器消费事件 |
 | `@State`、`EmbeddedViewHost { ContentView() }` | 保留根视图状态，写入后使宿主失效并经现有布局重绘 |
 | `RootGeometry` | 屏幕尺寸、内容边距、根视图尺寸提议与居中 |
 | `Layout` | 支持带类型缓存的泛型自定义布局，分别执行尺寸测量与放置 |
@@ -245,7 +265,7 @@ MCU 不新增整屏 framebuffer；示例图片是 Flash 中 512 字节 RGB565 �
 新生方块获得新 ID。自定义 `Layout` 将 16 个前景槽位放置到目标格；固定背景及
 周边 UI 仍使用 VStack/HStack，没有 offset，也不使用整屏位图。
 
-需要 OpenSwiftUI Embedded **profile 4**，包含 `withAnimation`、`.id(UInt32)`
+需要 OpenSwiftUI LVGL **profile 5**，包含 `withAnimation`、`.id(UInt32)`
 及 `.transition(.scale.combined(with: .opacity))`。请一起重新构建框架与固件。
 这仍是有限动画子集，不包含 `.animation(_:value:)`、弹簧或完整桌面 Animatable。
 

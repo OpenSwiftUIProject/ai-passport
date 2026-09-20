@@ -21,7 +21,7 @@ The firmware and host workflows validate pull requests: `.github/workflows/stati
 
 Both jobs use macOS 15 and the shared `.github/actions/setup-embedded` action:
 Swift 6.3.1 and OpenSwiftUI revision
-`e35b91a31789c3c277e9a784b9f9b86e5eb708f5` are installed explicitly. The
+`098b5a28985d55a1d949cc03c1292b80680704e9` are installed explicitly. The
 OpenSwiftUI checkout lives under ignored `build/ci/`, with no sibling workspace
 or OpenAttributeGraph checkout required. Firmware jobs additionally install
 ESP-IDF 5.5.3, its ESP32-C3 tools, and Python 3.12, then activate them through

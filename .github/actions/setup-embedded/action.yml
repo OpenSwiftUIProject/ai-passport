@@ -14,7 +14,7 @@ runs:
     - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       with:
         repository: OpenSwiftUIProject/OpenSwiftUI
-        ref: e35b91a31789c3c277e9a784b9f9b86e5eb708f5
+        ref: 098b5a28985d55a1d949cc03c1292b80680704e9
         path: build/ci/OpenSwiftUI
         persist-credentials: false
 

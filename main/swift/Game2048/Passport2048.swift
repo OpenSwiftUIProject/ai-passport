@@ -26,9 +26,9 @@ func handlePassport2048Action(_ action: Int32) {
     guard let host = gameHost else { return }
     let button: PhysicalButton
     switch action {
-    case Int32(PASSPORT_ACTION_UP.rawValue): button = .up
-    case Int32(PASSPORT_ACTION_DOWN.rawValue): button = .down
-    case Int32(PASSPORT_ACTION_OK.rawValue): button = .ok
+    case Int32(PASSPORT_ACTION_UP.rawValue): button = .upArrow
+    case Int32(PASSPORT_ACTION_DOWN.rawValue): button = .downArrow
+    case Int32(PASSPORT_ACTION_OK.rawValue): button = .select
     default: return
     }
     if host.isAnimating {

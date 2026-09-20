@@ -6,6 +6,12 @@
 State 和 Passport LVGL 绘制。此工具属于 https://github.com/OpenSwiftUIProject/ai-passport，
 直接复用当前 checkout 的 C/Swift 桥接，WASM 预览不依赖 QEMU Simulator 仓库。
 
+WASM 使用 Embedded Swift，同时定义 `OPENSWIFTUI_LVGL`（通用渲染、布局和 State）与
+`OPENSWIFTUI_PLATFORM_FOLOTOY`（Passport 输入）。框架构建合并 `Embedded/sources.txt`
+与 `Embedded/folotoy-sources.txt`，与固件和主机预览一致。UP/DOWN/OK 在 `onPhyicButton`
+closure 中对应 `.upArrow` / `.downArrow` / `.select`。LVGL 配置本身也支持 macOS 普通
+Swift，不要求启用 FoloToy 适配器。
+
 预期在线入口为 https://openswiftuiproject.github.io/ai-passport/。
 访问者可直接操作预编译示例，也可连接自己的本地编译器。
 
@@ -56,7 +62,7 @@ node verify-static.mjs ../../build/pages/ai-passport
 
 导出目录必须为空。共享构建缓存放在 `build/playground/`，WASI C 库放在仓库旁的
 `toolchains/`。脚本下载 [OpenSwiftUI](https://github.com/OpenSwiftUIProject/OpenSwiftUI)
-的 `e35b91a31789c3c277e9a784b9f9b86e5eb708f5` 和 [LVGL](https://github.com/lvgl/lvgl)
+的 `098b5a28985d55a1d949cc03c1292b80680704e9` 和 [LVGL](https://github.com/lvgl/lvgl)
 9.5.0 的 `85aa60d18b3d5e5588d7b247abf90198f07c8a63`。不需要 OAG 或 ESP-IDF。
 API 与构建边界见[本地安装说明](LOCAL_COMPILER.zh_CN.md)。
 
