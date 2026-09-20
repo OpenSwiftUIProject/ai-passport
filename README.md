@@ -25,9 +25,9 @@ struct ContentView: View {
         }
         .padding(12)
         .background(useBlue ? Color.blue : Color.black)
-        .onPhyicButton(.up) { useBlue = false }
-        .onPhyicButton(.down) { useBlue = true }
-        .onPhyicButton(.ok) { showImage.toggle() }
+        .onPhyicButton(.upArrow) { useBlue = false }
+        .onPhyicButton(.downArrow) { useBlue = true }
+        .onPhyicButton(.select) { showImage.toggle() }
     }
 }
 ```
@@ -94,7 +94,7 @@ scene (24 KB more static RAM than the original display demo). The 64-bit host
 preview checks the pool and reports its peak; device heap measurements remain
 a separate acceptance step.
 
-The animated game requires OpenSwiftUI Embedded profile 4 from the
+The animated game requires OpenSwiftUI LVGL profile 5 from the
 `embed/folotoy` branch; no additional framework repositories are required.
 This profile has static text and no dynamic `ForEach`, so finite tile labels and
 six score digits use `StaticString`, with rows and foreground slots declared explicitly.
@@ -161,7 +161,8 @@ its absolute path instead of cloning again:
 export OPENSWIFTUI_SOURCE_DIR=/absolute/path/to/OpenSwiftUI
 ```
 
-The checkout must contain `Embedded/sources.txt` and `Embedded/idf.cmake`.
+The checkout must contain `Embedded/sources.txt`, `Embedded/folotoy-sources.txt`
+and `Embedded/idf.cmake` (profile 5 or later).
 The firmware builds and links the framework automatically; no manual archive
 copy or OAG setup is required. See the
 [OpenSwiftUI Embedded guide](https://github.com/OpenSwiftUIProject/OpenSwiftUI/blob/embed/folotoy/Embedded/README.md)
@@ -191,14 +192,35 @@ tools/with-env.sh idf.py size
 ```
 
 The build automatically rebuilds the separately compiled OpenSwiftUI module
-when any selected source changes. `Embedded/sources.txt` in the framework
-checkout is the source selection, and `Embedded/idf.cmake` connects it to IDF.
+when any selected source changes. `Embedded/sources.txt` selects the generic
+LVGL sources and `Embedded/folotoy-sources.txt` adds the FoloToy input adapter.
+`Embedded/idf.cmake` connects them to IDF using `PLATFORM folotoy`.
 Set `OPENSWIFTUI_SOURCE_DIR` before a fresh build to use another clone; an
 existing CMake cache can be changed with `idf.py -DOPENSWIFTUI_SOURCE_DIR=... build`.
 The framework's `Embedded/README.md` also documents standalone host builds and
-tests that require neither ESP-IDF nor LVGL. Its build script enables
-`OPENSWIFTUI_LVGL && hasFeature(Embedded)` through the LVGL flag and the
-compiler's Embedded Swift mode.
+tests that require neither ESP-IDF nor LVGL. The compile-time options are separate:
+
+| Option | Purpose |
+| --- | --- |
+| `OPENSWIFTUI_LVGL` | Generic rendering, layout, retained State and animation. |
+| `OPENSWIFTUI_PLATFORM_FOLOTOY` | Board input: `PhysicalButton`, `onPhyicButton` and host `send`. |
+| Embedded Swift language mode | Compiler/runtime choice, independent of the rendering profile. |
+
+Passport firmware, WASM and host previews define both macros. The physical UP,
+DOWN and OK buttons map to the upstream `.upArrow`, `.downArrow` and `.select`
+cases. The old `.up` / `.down` / `.ok` physical-button names are no longer supported.
+Another LVGL platform can omit the FoloToy flag and adapter sources. Ordinary
+Swift on macOS can also use this LVGL profile; it is not gated on `hasFeature(Embedded)`.
+To exercise this firmware's real LVGL renderer using ordinary Swift:
+
+```bash
+PASSPORT_SWIFT_MODE=standard PASSPORT_PREVIEW_BUILD_DIR=../work/openswiftui-native \
+    tools/with-env.sh ./tools/preview-openswiftui.sh ../work/openswiftui-native.png
+```
+
+The default preview mode remains `embedded`. Both modes generate PNG fixtures;
+they do not open a native window. Framework and client must use matching flags
+and language modes, and must be rebuilt together for profile 5.
 
 Toolchain: **ESP-IDF 5.5.3**, **Swift 6.3.1 RELEASE** with RISC-V Embedded
 libraries, CMake 3.29+, Ninja and Python 3.12. `tools/with-env.sh` activates only
@@ -217,7 +239,7 @@ See the [initial toolchain/deployment record](docs/development/engineering/embed
 | `Image("spark")`, `.resizable()` | Intrinsic asset size by default; resizable images accept size proposals with nearest-neighbor scaling |
 | `Text("literal")`, `.foregroundStyle(Color)` | Actual Montserrat 14 measurement and width-dependent wrapping; no dynamic localization or CJK font |
 | `VStack`, `HStack`, `VStackLayout`, `HStackLayout` | Measure/place layout, explicit spacing, edge/center alignment, and flexible-space distribution |
-| `onPhyicButton(.up/.down/.ok) { ... }` | Synchronous platform-dispatched button closures; first matching handler consumes the event |
+| `onPhyicButton(.upArrow/.downArrow/.select) { ... }` | Synchronous platform-dispatched button closures; first matching handler consumes the event |
 | `@State`, `EmbeddedViewHost { ContentView() }` | Retained root state; writes invalidate the host and redraw through the existing layout |
 | `RootGeometry` | Physical screen size and content insets, root size proposal and centering |
 | `Layout` | Custom generic layouts with a typed cache and separate size/placement phases |
@@ -277,7 +299,7 @@ spawned tiles receive new IDs. A custom `Layout` places the 16 foreground slots
 at their destination cells. The fixed background and surrounding UI still use
 VStack/HStack; no offsets or whole-screen bitmap are used.
 
-This requires OpenSwiftUI Embedded profile **4**, including `withAnimation`,
+This requires OpenSwiftUI LVGL profile **5**, including `withAnimation`,
 `.id(UInt32)` and `.transition(.scale.combined(with: .opacity))`. Rebuild the
 framework and firmware together. It remains a limited animation subset, without
 `.animation(_:value:)`, springs or general desktop Animatable support.

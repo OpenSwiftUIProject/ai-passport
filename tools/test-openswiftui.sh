@@ -9,7 +9,7 @@ fi
 "${osui_root}/Scripts/test_embedded.sh"
 test_dir="$(mktemp -d "${TMPDIR:-/tmp}/passport-openswiftui.XXXXXX")"
 trap 'rm -rf -- "${test_dir}"' EXIT
-python3 "${osui_root}/Scripts/build_embedded.py" --target host --output "${test_dir}"
+python3 "${osui_root}/Scripts/build_embedded.py" --target host --platform folotoy --output "${test_dir}"
 cd "${repo_root}"
 "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Itests/swift-interop/include -Imain/swift \
     -c tests/openswiftui-interop/harness.c -o "${test_dir}/harness.o"
@@ -18,6 +18,7 @@ if [[ "$(uname -s)" == Darwin ]]; then
     host_flags=(-sdk "$(xcrun --show-sdk-path)")
 fi
 swiftc -enable-experimental-feature Embedded -wmo -Osize -parse-as-library \
+    -DOPENSWIFTUI_LVGL -DOPENSWIFTUI_PLATFORM_FOLOTOY \
     "${host_flags[@]}" -I "${test_dir}" -Xcc -Itests/swift-interop/include \
     -import-bridging-header main/swift/PassportBridge.h \
     main/swift/PassportCore/PassportState.swift main/swift/PassportDemo.swift \

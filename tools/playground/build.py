@@ -28,12 +28,16 @@ def run(args):
 
 def swift_flags():
     return [SWIFTC, '-target', 'wasm32-unknown-none-wasm', '-module-cache-path', BUILD / 'module-cache',
-            '-enable-experimental-feature', 'Embedded', '-wmo', '-Osize', '-parse-as-library', '-DOPENSWIFTUI_LVGL']
+            '-enable-experimental-feature', 'Embedded', '-wmo', '-Osize', '-parse-as-library',
+            '-DOPENSWIFTUI_LVGL', '-DOPENSWIFTUI_PLATFORM_FOLOTOY']
 
 def prepare():
     BUILD.mkdir(parents=True, exist_ok=True)
-    sources = [OSUI / line for line in (OSUI / 'Embedded/sources.txt').read_text().splitlines() if line]
-    stamp = hashlib.sha256(b''.join(p.read_bytes() for p in sources) + str(SWIFTC).encode()).hexdigest()
+    manifests = [OSUI / 'Embedded/sources.txt', OSUI / 'Embedded/folotoy-sources.txt']
+    sources = [OSUI / line for manifest in manifests for line in manifest.read_text().splitlines() if line]
+    # A source path or compiler define change must also invalidate the module.
+    stamp = hashlib.sha256(b''.join(p.read_bytes() for p in sources)
+                           + json.dumps([str(p) for p in sources] + [str(f) for f in swift_flags()]).encode()).hexdigest()
     marker = BUILD / 'osui.stamp'
     if not marker.exists() or marker.read_text() != stamp:
         flags = swift_flags() + ['-package-name', 'OpenSwiftUI', '-module-name', 'OpenSwiftUI']

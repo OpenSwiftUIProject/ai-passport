@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- 拆分通用 `OPENSWIFTUI_LVGL` 渲染与 `OPENSWIFTUI_PLATFORM_FOLOTOY` 输入；固件、WASM 和 Passport 预览同时启用两者。升级到 profile 5 并采用上游 `.upArrow` / `.downArrow` / `.select` 按键名，支持 macOS 普通 Swift LVGL 预览并验证配置边界。
 - 本地 Playground 预览支持跨源直连线上 Simulator 传递固件，无需本地模拟器地址。
 - Simulator 默认联动改为浏览器版 Pages 站点；修复修改、重置或断开编译器后残留的旧固件运行链接。
 - 新增 Open Graph 与 X 分享元数据及可下载的 Playground 封面，并更新文档记录已验证的公开 Pages 与本地编译器流程。

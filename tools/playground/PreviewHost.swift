@@ -13,9 +13,9 @@ func initializePreview() {
 func sendPreviewButton(_ value: Int32) {
     guard let host else { return }
     switch value {
-    case 0: host.send(.up)
-    case 1: host.send(.down)
-    case 2: host.send(.ok)
+    case 0: host.send(.upArrow)
+    case 1: host.send(.downArrow)
+    case 2: host.send(.select)
     default: return
     }
     if host.needsRender { renderPassportScene(host) }

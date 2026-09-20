@@ -7,6 +7,13 @@ Embedded layout, State and Passport LVGL rendering. This tool belongs to
 https://github.com/OpenSwiftUIProject/ai-passport and uses that checkout's C/Swift
 bridge directly. Its WASM preview does not require the QEMU Simulator repository.
 
+WASM uses Embedded Swift and defines both `OPENSWIFTUI_LVGL` (generic rendering,
+layout and State) and `OPENSWIFTUI_PLATFORM_FOLOTOY` (Passport input). Its framework
+build combines `Embedded/sources.txt` with `Embedded/folotoy-sources.txt`, matching
+the firmware and host preview. UP/DOWN/OK use `.upArrow` / `.downArrow` / `.select`
+in `onPhyicButton` closures. The LVGL profile itself also supports ordinary Swift
+on macOS and does not require the FoloToy adapter.
+
 The intended hosted entry is https://openswiftuiproject.github.io/ai-passport/.
 Visitors can play the bundled example immediately or connect their own compiler.
 
@@ -61,7 +68,7 @@ node verify-static.mjs ../../build/pages/ai-passport
 Choose an empty export directory. The launcher caches framework/C objects under
 `build/playground/`; WASI C libraries live in the sibling `toolchains/` directory.
 It downloads [OpenSwiftUI](https://github.com/OpenSwiftUIProject/OpenSwiftUI) at
-`e35b91a31789c3c277e9a784b9f9b86e5eb708f5` and [LVGL](https://github.com/lvgl/lvgl)
+`098b5a28985d55a1d949cc03c1292b80680704e9` and [LVGL](https://github.com/lvgl/lvgl)
 9.5.0 at `85aa60d18b3d5e5588d7b247abf90198f07c8a63`. No OAG or ESP-IDF is needed.
 Build limits and the API boundary are documented in [local setup](LOCAL_COMPILER.md).
 
